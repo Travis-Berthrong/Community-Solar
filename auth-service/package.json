@@ -23,7 +23,7 @@
     "postversion": "git push && git push --tags",
     "prepare": "npm run build",
     "serve": "nodemon ./src/index.ts",
-    "test": "mocha",
+    "test": "mocha -r ts-node/register 'test/**/*.spec.ts'",
     "upgrade": "npx npm-check -u",
     "version": "npm run build && npm run changelog:update"
   },
@@ -33,17 +33,20 @@
     "@types/express": "^5.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.4.1",
+    "@types/sinon": "^17.0.3",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
     "chai": "^4.3.7",
     "conventional-changelog-cli": "^5.0.0",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.44.0",
-    "mocha": "^10.2.0",
+    "mocha": "^10.8.2",
     "nodemon": "^3.0.1",
     "nyc": "^15.1.0",
     "source-map-support": "^0.5.21",
-    "ts-node": "^10.9.1",
+    "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
   },
   "config": {
@@ -53,11 +56,13 @@
   },
   "dependencies": {
     "auth-service": "file:",
+    "bcrypt-ts": "^5.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.1.13",
+    "sinon": "^19.0.2",
     "sitka": "^1.1.1",
     "typeorm": "^0.3.20"
   }
