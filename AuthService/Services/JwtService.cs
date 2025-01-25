@@ -13,7 +13,9 @@ namespace AuthService.Services
             var userJwtConfig = _configuration.GetSection("UserJwt").Get<JwtConfig>() ?? throw new InvalidOperationException("UserJwtConfig not found.");
             var claims = new[] {
                     new Claim(JwtRegisteredClaimNames.Sub, userId),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                    new Claim("role", "user")
                 };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
