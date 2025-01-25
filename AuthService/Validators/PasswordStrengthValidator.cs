@@ -27,6 +27,10 @@ namespace AuthService.Validators
             {
                 return new ValidationResult("Password must contain at least one lowercase letter");
             }
+            if(!password.Any(ch => !char.IsLetterOrDigit(ch)))
+            {
+                return new ValidationResult("Password must contain at least one special character");
+            }
             return ValidationResult.Success;
         }
 

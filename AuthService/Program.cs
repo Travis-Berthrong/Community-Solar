@@ -1,8 +1,12 @@
 
+using System.Text;
+using AuthService.Config;
 using AuthService.Data;
 using AuthService.Models;
 using AuthService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace AuthService
@@ -14,10 +18,26 @@ namespace AuthService
             var builder = WebApplication.CreateBuilder(args);
             var authConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'AuthContextConnection' not found.");
             builder.Services.AddDbContext<AuthDBContext>(options => options.UseNpgsql(authConnectionString));
+            builder.Services.AddDefaultIdentity<User>(options => options.User.RequireUniqueEmail = true).AddEntityFrameworkStores<AuthDBContext>();
 
-            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<AuthDBContext>();
+            var userJwtConfig = builder.Configuration.GetSection("UserJwt").Get<JwtConfig>() ?? throw new InvalidOperationException("UserJwtConfig not found.");
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
+                options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = userJwtConfig.Issuer,
+                        ValidAudience = userJwtConfig.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key))
+                    };
+                });
 
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<JwtService>();
 
             // Add services to the container.
 
