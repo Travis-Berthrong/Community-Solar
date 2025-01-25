@@ -1,6 +1,7 @@
-﻿using AuthService.DTOs.User;
+﻿using AuthService.DTOs.UserDtos;
 using AuthService.Models;
 using AuthService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,10 +20,16 @@ namespace AuthService.Controllers
         }
 
         // GET api/<UserController>/5
+        [Authorize]
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<UserOut>> Get(string id)
         {
-            return "value";
+            var user = await _userService.GetUser(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return new UserOut(user);
         }
         // POST api/<UserController>
         [HttpPost("signup", Name = "signup")]

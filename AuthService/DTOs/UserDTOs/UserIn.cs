@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AuthService.Validators;
 
-namespace AuthService.DTOs.User
+namespace AuthService.DTOs.UserDtos
 {
     public class UserIn
     {

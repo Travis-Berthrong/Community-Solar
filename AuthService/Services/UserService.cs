@@ -32,6 +32,12 @@ namespace AuthService.Services
             return user.Id;
         }
 
+        public async Task<User?> GetUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            return user;
+        }
+
 
     }
 }

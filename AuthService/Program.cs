@@ -32,7 +32,9 @@ namespace AuthService
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = userJwtConfig.Issuer,
                         ValidAudience = userJwtConfig.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key)),
+                        ValidateActor = true,
+                        LogValidationExceptions = true,
                     };
                 });
 
@@ -57,6 +59,7 @@ namespace AuthService
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
