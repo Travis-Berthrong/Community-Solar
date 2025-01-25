@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using AuthService.Validators;
 
 namespace AuthService.DTOs.User
 {
@@ -8,12 +9,12 @@ namespace AuthService.DTOs.User
         public required string FirstName { get; set; }
         [Required]
         public required string LastName { get; set; }
-        [Required]
+        [Required, EmailAddress]
         public required string Email { get; set; }
-        [Required]
+        [Required, Phone]
         public required string PhoneNumber { get; set; }
 
-        [Required]
+        [Required, PasswordStrengthValidator]
         public required string Password { get; set; }
 
         [Required]
