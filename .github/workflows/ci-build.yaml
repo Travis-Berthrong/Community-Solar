@@ -1,32 +1,59 @@
-name: Node.js CI Build
-
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches:
+            - main
+        tags:
+            - 'v*'
+
+env:
+    REGISTRY: ghcr.io
 
 jobs:
-  build-auth-service:
+    auth:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            attestations: write
+            id-token: write
 
-    strategy:
-      matrix:
-        node-version: [ 16.x, 18.x, 19.x ]
-    
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-        with:
-          path: ./auth-service
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./auth-service
-      - name: Run tests and check coverage
-        run: npm run cover:check
-        working-directory: ./auth-service
+        steps:
+            - 
+                name: Checkout
+                uses: actions/checkout@v4
+            
+            - 
+                name: Log in to the Container registry
+                uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+                with:
+                    registry: ${{ env.REGISTRY }}
+                    username: ${{ github.actor }}
+                    password: ${{ secrets.GITHUB_TOKEN }}
+
+            - 
+                name: Docker meta
+                id: meta
+                uses: docker/metadata-action@v5
+                with:
+                    images: ${{ env.REGISTRY }}/${{ github.repository }}-AuthService
+                    tags: |
+                        type=schedule
+                        type=semver,pattern={{version}}
+                        type=semver,pattern={{version}},prefix=v
+                        type=semver,pattern={{major}}.{{minor}}
+                        type=semver,pattern={{major}}.{{minor}},prefix=v
+                        type=semver,pattern={{major}}
+                        type=semver,pattern={{major}},prefix=v
+                        type=ref,event=branch
+                        type=ref,event=pr
+                        type=sha
+                        type=raw,value=latest,enable={{is_default_branch}}
+
+            - 
+                name: Build
+                uses: docker/build-push-action@v2
+                with:
+                    context: ./AuthService
+                    push: true
+                    tags: ${{ steps.meta.outputs.tags }}
