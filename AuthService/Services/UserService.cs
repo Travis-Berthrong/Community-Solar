@@ -6,9 +6,30 @@ namespace AuthService.Services
 {
     public class UserService(UserManager<User> _userManager)
     {
-        public async Task CreateUser(User user, string password)
+        public async Task<bool> CreateUser(User user, string password)
         {
-            await _userManager.CreateAsync(user, password);
+            var res = await _userManager.CreateAsync(user, password);
+            if (!res.Succeeded)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public async Task<string?> CheckUserCredentials(string email, string password)
+        {
+            string normalizedEmail = email.ToUpper();
+            var user = await _userManager.FindByEmailAsync(normalizedEmail);
+            if (user == null)
+            {
+                return null;
+            }
+            bool isValid = await _userManager.CheckPasswordAsync(user, password);
+            if (!isValid)
+            {
+                return null;
+            }
+            return user.Id;
         }
 
 

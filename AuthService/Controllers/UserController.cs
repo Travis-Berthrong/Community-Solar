@@ -9,7 +9,7 @@ namespace AuthService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(UserService _userService) : ControllerBase
+    public class UserController(UserService _userService, JwtService _jwtService) : ControllerBase
     {
         // GET: api/<UserController>
         [HttpGet]
@@ -24,9 +24,8 @@ namespace AuthService.Controllers
         {
             return "value";
         }
-
         // POST api/<UserController>
-        [HttpPost]
+        [HttpPost("signup", Name = "signup")]
         public async Task<ActionResult> Post([FromBody] UserIn userIn)
         {
             if (!ModelState.IsValid)
@@ -35,14 +34,41 @@ namespace AuthService.Controllers
             }
             var user = new User
             {
+                UserName = userIn.Email,
+                NormalizedUserName = userIn.Email.ToUpper(),
                 FirstName = userIn.FirstName,
                 LastName = userIn.LastName,
                 Email = userIn.Email,
+                NormalizedEmail = userIn.Email.ToUpper(),
                 PhoneNumber = userIn.PhoneNumber,
                 Address = userIn.Address
             };
-            await _userService.CreateUser(user, userIn.Password);
-            return Ok();
+            bool res = await _userService.CreateUser(user, userIn.Password);
+            if (!res)
+            {
+                return StatusCode(500);
+            }
+            return StatusCode(201);
+        }
+
+        [HttpPost("login", Name = "login")]
+        public async Task<ActionResult> Login([FromBody] UserLogin userLogin)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var userId = await _userService.CheckUserCredentials(userLogin.Email, userLogin.Password);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            var token = _jwtService.GenerateUserToken(userId);
+            if (token == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok(token);
         }
 
         // PUT api/<UserController>/5
