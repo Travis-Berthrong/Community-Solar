@@ -15,11 +15,13 @@ export default function Login() {
       return;
     }
     try {
-      await login(email, password);
+      const token = await login(email, password);
+      console.log('Login successful, token:', token);
       router.replace('/home');
     } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Login failed. Please try again.');
+      console.error('Login error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.';
+      Alert.alert('Error', errorMessage);
     }
   };
 
