@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "incremental": false,
+        "target": "es2016",
+        "module": "commonjs",
+        "rootDir": "./",
+        "baseUrl": "./",
+        "resolveJsonModule": true,
+        "declaration": true,
+        "sourceMap": true,
+        "outDir": "dist",
+        "removeComments": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "skipLibCheck": true,
+        "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
+        "emitDecoratorMetadata": true
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+  }
