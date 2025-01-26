@@ -15,14 +15,15 @@ export const login = async (email: string, password: string) => {
 };
 
 export const signup = async (userData: any) => {
-  const response = await fetch(`${API_URL}/signup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
-  });
-  if (!response.ok) throw new Error('Signup failed');
-  return response.json();
-};
+    const response = await fetch(`${API_URL}/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    if (!response.ok) throw new Error('Signup failed');
+    return response;
+  };
+  
 
 export const setToken = async (token: string) => {
   await AsyncStorage.setItem('userToken', token);

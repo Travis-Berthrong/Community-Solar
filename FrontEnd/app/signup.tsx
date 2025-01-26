@@ -16,28 +16,33 @@ export default function Signup() {
   const handleSignup = async () => {
     console.log('Signup button pressed');
     
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password || !firstName || !lastName || !phoneNumber || !address) {
       console.log('Form validation failed');
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
-
+  
     setIsLoading(true);
-    console.log('Attempting signup with:', { email, firstName, lastName });
-
+    console.log('Attempting signup with:', { Email: email, FirstName: firstName, LastName: lastName });
+  
     try {
-      const result = await signup({
-        email,
-        password,
-        firstName,
-        lastName,
-        phoneNumber,
-        address
+      const response = await signup({
+        Email: email,
+        Password: password,
+        FirstName: firstName,
+        LastName: lastName,
+        PhoneNumber: phoneNumber,
+        Address: address
       });
-      console.log('Signup successful:', result);
-      Alert.alert('Success', 'Account created successfully');
-      console.log('Navigating to login page');
-      router.replace('/login');
+      
+      if (response.status === 201) {
+        console.log('Signup successful');
+        Alert.alert('Success', 'Account created successfully');
+        console.log('Navigating to login page');
+        router.replace('/login');
+      } else {
+        throw new Error('Signup failed');
+      }
     } catch (error) {
       console.error('Signup error:', error);
       Alert.alert('Error', 'Signup failed. Please try again.');
