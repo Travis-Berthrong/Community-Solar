@@ -29,7 +29,7 @@ export default function Login() {
       style={loginStyles.container}
     >
       <View style={loginStyles.card}>
-        <Text style={loginStyles.title}>Welcome Back</Text>
+        <Text style={loginStyles.title}>Login</Text>
         <TextInput
           style={loginStyles.input}
           placeholder="Email"

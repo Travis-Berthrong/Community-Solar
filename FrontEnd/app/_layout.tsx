@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, Redirect } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -13,8 +13,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -24,33 +23,27 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (loaded && !isLoading) {
+    if (loaded && isLoggedIn !== null) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, isLoading]);
+  }, [loaded, isLoggedIn]);
 
   async function checkLoginStatus() {
     const token = await getToken();
     setIsLoggedIn(!!token);
-    setIsLoading(false);
   }
 
-  if (!loaded || isLoading) {
+  if (!loaded || isLoggedIn === null) {
     return null;
   }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {isLoggedIn ? (
-        <Stack>
-          <Stack.Screen name="home" options={{ headerShown: false }} />
-        </Stack>
-      ) : (
-        <Stack>
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="signup" options={{ headerShown: false }} />
-        </Stack>
-      )}
+      <Stack initialRouteName={isLoggedIn ? 'home' : 'login'}>
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="home" options={{ headerShown: false }} />
+      </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
