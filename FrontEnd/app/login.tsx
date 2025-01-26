@@ -26,40 +26,48 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={loginStyles.container}
-    >
-      <View style={loginStyles.card}>
-        <Text style={loginStyles.title}>Login</Text>
-        <TextInput
-          style={loginStyles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={loginStyles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <Button 
-          title="Login" 
-          onPress={handleLogin}
-          buttonStyle={loginStyles.loginButton}
-          titleStyle={loginStyles.buttonText}
-        />
-        <Button 
-          title="Sign Up" 
-          onPress={() => router.push('/signup')} 
-          type="clear"
-          titleStyle={loginStyles.signUpText}
-        />
-      </View>
-    </KeyboardAvoidingView>
+    <KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  style={loginStyles.container}
+>
+  <View style={loginStyles.card}>
+    <Text style={loginStyles.title}>Let's Save the Planet!</Text>
+    <Text style={loginStyles.subtitle}>
+      Please login to your account to continue.
+    </Text>
+    <TextInput
+      style={loginStyles.input}
+      placeholder="Email Address"
+      placeholderTextColor="#888"
+      value={email}
+      onChangeText={setEmail}
+      keyboardType="email-address"
+      autoCapitalize="none"
+    />
+    <TextInput
+      style={loginStyles.input}
+      placeholder="Password"
+      placeholderTextColor="#888"
+      value={password}
+      onChangeText={setPassword}
+      secureTextEntry
+    />
+    <Button
+      title="Login"
+      onPress={handleLogin}
+      buttonStyle={loginStyles.loginButton}
+      titleStyle={loginStyles.buttonText}
+    />
+    <View style={loginStyles.footer}>
+      <Text style={loginStyles.footerText}>Don't have an account?</Text>
+      <Button
+        title="Sign Up"
+        onPress={() => router.push('/signup')}
+        type="clear"
+        titleStyle={loginStyles.signUpText}
+      />
+    </View>
+  </View>
+</KeyboardAvoidingView>
   );
 }
