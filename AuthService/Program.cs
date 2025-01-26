@@ -30,7 +30,9 @@ namespace AuthService
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = userJwtConfig.Issuer,
                         ValidAudience = userJwtConfig.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key)),
+                        ValidateActor = true,
+                        LogValidationExceptions = true,
                     };
                 });
 
@@ -64,6 +66,7 @@ namespace AuthService
             // Use CORS middleware
             app.UseCors("AllowReactNativeApp");
 
+            app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();

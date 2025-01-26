@@ -1,7 +1,10 @@
-﻿using AuthService.DTOs.User;
+﻿using System.Security.Claims;
+using AuthService.DTOs.UserDtos;
 using AuthService.Models;
 using AuthService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,19 +14,40 @@ namespace AuthService.Controllers
     [ApiController]
     public class UserController(UserService _userService, JwtService _jwtService) : ControllerBase
     {
-        // GET: api/<UserController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        // GET api/<UserController>/5
+        [Authorize]
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserOut>> Get(string id)
         {
-            return new string[] { "value1", "value2" };
+            var user = await _userService.GetUser(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return new UserOut(user);
         }
 
-        // GET api/<UserController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserOut>> GetCurrentUser()
         {
-            return "value";
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                         User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userService.GetUser(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(new UserOut(user));
+
         }
+
         // POST api/<UserController>
         [HttpPost("signup", Name = "signup")]
         public async Task<ActionResult> Post([FromBody] UserIn userIn)

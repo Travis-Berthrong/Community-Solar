@@ -14,7 +14,9 @@ namespace AuthService.Services
             var claims = new[] {
                     new Claim(JwtRegisteredClaimNames.Sub, userId),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Iat,
+                        new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
+                        ClaimValueTypes.Integer64),
                     new Claim("role", "user")
                 };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userJwtConfig.Key));
@@ -22,7 +24,7 @@ namespace AuthService.Services
             var token = new JwtSecurityToken(userJwtConfig.Issuer,
                 userJwtConfig.Audience,
                 claims,
-                expires: DateTime.Now.AddMinutes(userJwtConfig.ExpiryInMinutes),
+                expires: DateTime.UtcNow.AddMinutes(userJwtConfig.ExpiryInMinutes),
                 signingCredentials: creds);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
