@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
+import { TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Button } from '@rneui/themed';
 import { router } from 'expo-router';
 import { signup } from '../services/auth';
@@ -11,10 +11,22 @@ export default function Signup() {
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async () => {
+    console.log('Signup button pressed');
+    
+    if (!email || !password || !firstName || !lastName) {
+      console.log('Form validation failed');
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    setIsLoading(true);
+    console.log('Attempting signup with:', { email, firstName, lastName });
+
     try {
-      await signup({
+      const result = await signup({
         email,
         password,
         firstName,
@@ -22,12 +34,21 @@ export default function Signup() {
         phoneNumber,
         address
       });
+      console.log('Signup successful:', result);
       Alert.alert('Success', 'Account created successfully');
+      console.log('Navigating to login page');
       router.replace('/login');
     } catch (error) {
-      console.error(error);
+      console.error('Signup error:', error);
       Alert.alert('Error', 'Signup failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const navigateToLogin = () => {
+    console.log('Navigating to login page');
+    router.replace('/login');
   };
 
   return (
@@ -73,11 +94,17 @@ export default function Signup() {
         onChangeText={setAddress}
         multiline
       />
-      <Button title="Sign Up" onPress={handleSignup} />
+      <Button 
+        title="Sign Up" 
+        onPress={handleSignup}
+        loading={isLoading}
+        disabled={isLoading}
+      />
       <Button 
         title="Already have an account? Login" 
-        onPress={() => router.replace('/login')} 
+        onPress={navigateToLogin}
         type="clear"
+        disabled={isLoading}
       />
     </ScrollView>
   );
