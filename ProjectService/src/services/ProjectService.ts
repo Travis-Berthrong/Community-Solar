@@ -4,22 +4,23 @@ import { ObjectId } from "bson";
 
 export default class ProjectService {
     public static async getProjects(): Promise<HydratedDocument<IProject>[]> {
-        return Project.find();
+        return await Project.find();
     }
 
     public static async getProjectById(id: ObjectId): Promise<HydratedDocument<IProject>> {
-        return Project.findById(id);
+        return await Project.findById(id);
     }
 
     public static async createProject(project: IProject): Promise<HydratedDocument<IProject>> {
-        return Project.create(project);
+        const newProject = new Project(project);
+        return await newProject.save();
     }
 
     public static async updateProject(id: ObjectId, project: IProject): Promise<HydratedDocument<IProject>> {
-        return Project.findByIdAndUpdate(id, project, { new: true });
+        return await Project.findByIdAndUpdate(id, project, { new: true });
     }
 
     public static async deleteProject(id: ObjectId): Promise<HydratedDocument<IProject>> {
-        return Project.findByIdAndDelete(id);
+        return await Project.findByIdAndDelete(id);
     }
 }

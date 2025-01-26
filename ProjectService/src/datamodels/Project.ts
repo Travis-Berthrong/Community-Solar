@@ -20,14 +20,14 @@ export interface IProject {
         userId: string;
         firstName: string;
         lastName: string;
-    }],
+    }?],
     comments: [{
         userId: string;
         firstName: string;
         lastName: string;
         comment: string;
         commentDate: Date;
-    }]
+    }?]
 }
 
 const ProjectSchema = new Schema<IProject>({
