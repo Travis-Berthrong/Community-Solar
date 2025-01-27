@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 
+//TODO Add more percise geomapping data (lat & long )
 export interface IProject {
     title: string;
     description: string;
