@@ -3,15 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, ActivityIndicator, ScrollView, useColorScheme } from 'react-native';
 import { getStyles } from '@/styles/addprojectStyles';
 import { IProject } from '@/types/IProject';
-
-interface ProjectInfo {
-  title: string;
-  description: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  landSize: number;
-}
+import { IProjectInfo } from '@/types/IProjectInfo';
 
 interface ProjectMetrics {
   projectCost: number;
@@ -22,7 +14,7 @@ interface ProjectMetrics {
 }
 
 interface ProjectForecastProps {
-  projectInfo: ProjectInfo;
+  projectInfo: IProjectInfo;
   onBack: () => void;
 }
 
@@ -42,15 +34,6 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
   const fetchProjectMetrics = async () => {
     setIsLoading(true);
     setError(null);
-    // const testData = {
-    //   projectCost: 1000000,
-    //   estimatedElectricityOutput: 100000,
-    //   estimatedCO2Savings: 50,
-    //   estimatedRevenue: 2000000,
-    //   estimatedROI: 100,
-    // };
-    // setMetrics(testData);
-    // setIsLoading(false);
 
     try {
       const response = await fetch('http://localhost:8080/api/projects/forecast', {

@@ -2,20 +2,11 @@ import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform, useColorScheme} from 'react-native';
 import { fetchAddressSuggestions, fetchCoordinates } from '@/utils/geoUtils';
 import { getStyles } from '@/styles/addprojectStyles';
-
-
-interface ProjectInfo {
-  title: string;
-  description: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  landSize: number;
-}
+import { IProjectInfo } from '@/types/IProjectInfo';
 
 interface CreateProjectFormProps {
-  onSubmit: (data: ProjectInfo) => void;
-  initialData?: ProjectInfo | null;
+  onSubmit: (data: IProjectInfo) => void;
+  initialData?: IProjectInfo | null;
 }
 
 const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSubmit, initialData }) => {
@@ -72,7 +63,7 @@ const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSubmit, initial
         return;
       }
 
-      const projectInfo: ProjectInfo = {
+      const projectInfo: IProjectInfo = {
         title,
         description,
         address,
