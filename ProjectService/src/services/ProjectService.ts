@@ -23,4 +23,20 @@ export default class ProjectService {
     public static async deleteProject(id: ObjectId): Promise<HydratedDocument<IProject>> {
         return await Project.findByIdAndDelete(id);
     }
+
+    public static async addInvestor(projectId: ObjectId, investorId: string, investorFirstName: string, investorLastName: string, investedAmount: number): Promise<HydratedDocument<IProject>> {
+        return await Project.findByIdAndUpdate(projectId, {
+            $push: {
+                investors: {
+                    userId: investorId,
+                    amount: investedAmount,
+                    firstName: investorFirstName,
+                    lastName: investorLastName
+                }
+            },
+            $inc: {
+                fundingCurrent: investedAmount
+            }
+        }, { new: true });
+    }
 }
