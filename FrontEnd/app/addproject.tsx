@@ -5,22 +5,16 @@ const CreateProjectForm = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
   const [landSize, setLandSize] = useState('');
-  const [fundingGoal, setFundingGoal] = useState('');
   const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const addressInputRef = useRef(null);
-
-  const GEOAPIFY_API_KEY = '9fac2d72553e436c9f1ff95e27cf3362';
-
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const styles = getStyles(isDarkMode);
 
-  const fetchAddressSuggestions = async (query: string) => {
+  const displayAddressSuggestions = async (query: string) => {
     if (!query) {
       setAddressSuggestions([]);
       setDropdownVisible(false);
@@ -31,23 +25,8 @@ const CreateProjectForm = () => {
     setDropdownVisible(true);
 
     try {
-      const response = await fetch(
-        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_API_KEY}`
-      );
-      const data = await response.json();
-      
-    interface GeoapifyFeature {
-        properties: {
-            formatted: string;
-        };
-    }
-
-    interface GeoapifyResponse {
-        features: GeoapifyFeature[];
-    }
-
-    // Modified code with types
-    setAddressSuggestions((data as GeoapifyResponse).features.map(feature => feature.properties.formatted));
+        const suggestions = await fetchAddressSuggestions(query);
+        setAddressSuggestions(suggestions);
     } catch (error) {
       console.error('Error fetching address suggestions:', error);
       setAddressSuggestions([]);
@@ -62,36 +41,20 @@ const CreateProjectForm = () => {
     fetchCoordinates(selectedAddress);
   };
 
-  const fetchCoordinates = async (address: string) => {
-    try {
-      const response = await fetch(
-        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${GEOAPIFY_API_KEY}`
-      );
-      const data = await response.json();
-
-      if ("features" in data && data.features.length > 0) {
-        const { lon, lat } = data.features[0].properties;
-        setLongitude(lon.toString());
-        setLatitude(lat.toString());
-      } else {
-        console.error('No coordinates found for the given address.');
-      }
-    } catch (error) {
-      console.error('Error fetching coordinates:', error);
-    }
-  };
-
   const handleSubmit = async () => {
-    await fetchCoordinates(address);
+    const { latitude, longitude } = await fetchCoordinates(address);
+    if (!latitude || !longitude) {
+      console.error('Invalid coordinates:', latitude, longitude);
+      return;
+    }
 
     const projectData = {
       title,
       description,
       address,
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
+      latitude: latitude,
+      longitude: longitude,
       landSize: parseFloat(landSize),
-      fundingGoal: parseFloat(fundingGoal),
     };
     console.log('Project Data:', projectData);
     //TODO switch to forecast screen, sending projectData as props
@@ -156,7 +119,7 @@ const CreateProjectForm = () => {
           value={address}
           onChangeText={(value) => {
             setAddress(value);
-            fetchAddressSuggestions(value);
+            displayAddressSuggestions(value);
           }}
           onFocus={() => {
             if (address && addressSuggestions.length > 0) {
@@ -180,7 +143,7 @@ const CreateProjectForm = () => {
         style={styles.input}
       />
 
-      <Text style={styles.label}>Funding Goal ($)</Text>
+      {/* <Text style={styles.label}>Funding Goal ($)</Text>
       <TextInput
         value={fundingGoal}
         onChangeText={setFundingGoal}
@@ -188,7 +151,7 @@ const CreateProjectForm = () => {
         placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
         keyboardType="numeric"
         style={styles.input}
-      />
+      /> */}
 
       {/* <Text style={styles.label}>Estimated Electricity Output (kWh)</Text>
       <TextInput
