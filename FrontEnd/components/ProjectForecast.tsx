@@ -4,6 +4,7 @@ import { View, Text, Button, ActivityIndicator, ScrollView, useColorScheme } fro
 import { getStyles } from '@/styles/addprojectStyles';
 import { IProject } from '@/types/IProject';
 import { IProjectInfo } from '@/types/IProjectInfo';
+import { useRouter } from 'expo-router';
 
 interface ProjectMetrics {
   projectCost: number;
@@ -22,6 +23,7 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
   const [metrics, setMetrics] = useState<ProjectMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
@@ -114,6 +116,8 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
       }
 
       alert('Project created successfully');
+      router.push('/home');
+
     } catch (err) {
       alert(err instanceof Error ? err.message : 'An error occurred');
     }
