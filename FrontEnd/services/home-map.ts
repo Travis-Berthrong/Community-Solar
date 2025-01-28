@@ -2,12 +2,12 @@ import { LocationObjectCoords } from 'expo-location';
 
 interface MapResponse {
   message: string;
-  mapHtml: string;
+  data: any; // The map data including user location and projects
 }
 
 export const fetchMapData = async (coords: LocationObjectCoords): Promise<MapResponse> => {
   try {
-    const response = await fetch('http://your-server-address/home-map', {
+    const response = await fetch('https://localhost:7294/api/home-map', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ export const fetchMapData = async (coords: LocationObjectCoords): Promise<MapRes
     }
 
     const data = await response.json();
-    return data; // Return the message and map HTML from the backend
+    return { message: data.message, data: data.data }; // Return message and data (user location and projects)
   } catch (error) {
     console.error('Error fetching map:', error);
     throw error; // Propagate the error to handle it in the component

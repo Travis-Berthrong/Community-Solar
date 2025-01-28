@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
-import { WebView } from 'react-native-webview';
 import { Button } from '@rneui/themed';
 import { Href, router } from 'expo-router';
 import { removeToken } from '../services/auth';
 import * as Location from 'expo-location';
+import L from 'leaflet';
 import { fetchMapData } from '../services/home-map'; // Import the service to fetch map data
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
   const isDarkMode = colorScheme === 'dark';
   const styles = getStyles(isDarkMode);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [mapHtml, setMapHtml] = useState<string | null>(null); // Store the map HTML here
+  const [mapData, setMapData] = useState<any | null>(null); // Store the map data here
   const [message, setMessage] = useState<string>('');
 
   const handleLogout = async () => {
@@ -42,9 +42,9 @@ export default function Home() {
   const fetchMap = async () => {
     if (!location) return; // Ensure location is available before making request
     try {
-      const { message, mapHtml } = await fetchMapData(location.coords);
+      const { message, data } = await fetchMapData(location.coords);
       setMessage(message);
-      setMapHtml(mapHtml);
+      setMapData(data);
     } catch (error) {
       console.error('Error fetching map data:', error);
       setMessage('Failed to load map.');
@@ -57,9 +57,35 @@ export default function Home() {
 
   useEffect(() => {
     if (location) {
-      fetchMap(); // Fetch the map once location is retrieved
+      fetchMap(); // Fetch the map data once location is retrieved
     }
   }, [location]);
+
+  useEffect(() => {
+    if (mapData) {
+      // Initialize the Leaflet map once data is available
+      const map = L.map('map').setView([mapData.userLocation.latitude, mapData.userLocation.longitude], 10);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+      // Add marker for current user's location
+      L.marker([mapData.userLocation.latitude, mapData.userLocation.longitude])
+        .bindPopup('Your location')
+        .addTo(map);
+
+      // Add project markers
+      mapData.projects.forEach((project: any) => {
+        const popupContent = `
+          <b>${project.title}</b><br>
+          <b>Creator:</b> ${project.owner}<br>
+          <b>Funds Raised:</b> ${project.fundingCurrent} / ${project.fundingGoal}<br>
+        `;
+        L.marker([project.latitude, project.longitude])
+          .bindPopup(popupContent)
+          .addTo(map);
+      });
+    }
+  }, [mapData]);
 
   return (
     <View style={styles.container}>
@@ -69,17 +95,9 @@ export default function Home() {
       <Text style={styles.title}>Your location is: {JSON.stringify(location?.coords)}</Text>
       
       {message && <Text style={styles.title}>{message}</Text>}
-      
-      {/* Display the map HTML content if available */}
-      {mapHtml ? (
-        <WebView
-          originWhitelist={['*']}
-          source={{ html: mapHtml }}
-          style={{ width: '100%', height: 500 }}
-        />
-      ) : (
-        <Text>Loading map...</Text>
-      )}
+
+      {/* Add the div element to render the map */}
+      <View id="map" style={{ width: '100%', height: 500 }}></View>
     </View>
   );
 }
