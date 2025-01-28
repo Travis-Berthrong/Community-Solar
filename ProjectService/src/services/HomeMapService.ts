@@ -1,7 +1,7 @@
 import { IProject } from '../datamodels/Project';
 import ProjectService from './ProjectService';
 import { HydratedDocument } from "mongoose";
-import L from 'leaflet'; // Assuming Leaflet is used for mapping
+import L from 'leaflet';
 import { Request, Response } from 'express';
 
 class HomeMapService {
@@ -10,7 +10,7 @@ class HomeMapService {
             // Fetch all projects
             const projects = await ProjectService.getProjects();
             
-            // Assuming the user's location is passed in the request body for simplicity
+            
             const { latitude: userLat, longitude: userLong } = req.body.userLocation;
 
             // Create a Leaflet map centered around the user's location
@@ -19,13 +19,19 @@ class HomeMapService {
             // Add a tile layer to the map (replace with your tile layer URL)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-            // Marker for current user's location
+            // Marker for current user's location with custom icon using L.icon
             L.marker([userLat, userLong])
                 .bindPopup('Your location')
-                .setIcon(L.icon({ iconUrl: '../../assests/person-icon.jpeg' }))
+                .setIcon(L.icon({
+                    iconUrl: '../../assests/person-icon.jpeg',  // Your custom icon image
+                    iconSize: [40, 40],  // Size of the icon
+                    iconAnchor: [20, 40],  // Anchor point to position the icon
+                    popupAnchor: [0, -40],  // Adjust popup position
+                    className: 'user-icon'  // Add a custom class for styling if needed
+                }))
                 .addTo(map);
 
-            // Add project markers
+            // Add project markers with custom icons using L.icon
             projects.forEach((project: HydratedDocument<IProject>) => {
                 const { latitude, longitude, title, owner, fundingCurrent, fundingGoal } = project;
                 const popupContent = `
@@ -38,7 +44,13 @@ class HomeMapService {
                 // Add marker for each project
                 L.marker([latitude, longitude])
                     .bindPopup(popupContent)
-                    .setIcon(L.icon({ iconUrl: '../../assests/project-icon.jpeg' }))
+                    .setIcon(L.icon({
+                        iconUrl: '../../assests/project-icon.jpeg',  // Your custom project icon
+                        iconSize: [40, 40],  // Size of the icon
+                        iconAnchor: [20, 40],  // Anchor point to position the icon
+                        popupAnchor: [0, -40],  // Adjust popup position
+                        className: 'project-icon'  // Add a custom class for styling if needed
+                    }))
                     .addTo(map);
             });
 
