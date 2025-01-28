@@ -19,7 +19,7 @@ const createCustomIcon = (iconUrl: string) =>
 
 const MapContainer = ({ mapData }: { mapData: any }) => {
   const userIcon = createCustomIcon(personIconUrl);
-  const projectIcon = createCustomIcon(require('../assets/images/project-icon.png'));
+  const projectIcon = createCustomIcon(projectIconUrl);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
