@@ -11,7 +11,7 @@ interface GeoapifyResponse {
 }
 
 
-const fetchCoordinates = async (address: string): Promise<{ latitude: number | null; longitude: number | null; }> => {
+export const fetchCoordinates = async (address: string): Promise<{ latitude: number | null; longitude: number | null; }> => {
     let latitude = null;
     let longitude = null;
     try {
@@ -35,7 +35,7 @@ const fetchCoordinates = async (address: string): Promise<{ latitude: number | n
     }
   };
 
-  const fetchAddressSuggestions = async (query: string): Promise<string[]> => {
+  export const fetchAddressSuggestions = async (query: string): Promise<string[]> => {
     if (!query) {
       return [];
     }
