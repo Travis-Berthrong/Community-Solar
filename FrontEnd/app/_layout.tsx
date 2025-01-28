@@ -53,6 +53,7 @@ export default function RootLayout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="signup" />
         <Stack.Screen name="home" options={{headerShown:false}}/>
+        <Stack.Screen name="addproject" options={{headerShown: false}} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

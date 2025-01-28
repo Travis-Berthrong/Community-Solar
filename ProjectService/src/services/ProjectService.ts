@@ -39,4 +39,24 @@ export default class ProjectService {
             }
         }, { new: true });
     }
+
+    public static async projectForecasting(_projectLat: number, _projectLong: number, _projectArea: number) {
+        // This function will calculate the estimated electricity output, CO2 savings, revenue, and ROI for a project
+        // based on the project's latitude, longitude, and land size.
+        // The calculation will be based on the project's location and size, and will use a predefined algorithm
+        // to estimate the project's performance.
+        // The estimated values will be returned as an object with the following properties:
+        // - estimatedElectricityOutput: number
+        // - estimatedCO2Savings: number
+        // - estimatedRevenue: number
+        // - estimatedROI: number
+
+        return {
+            projectCost: 10000,
+            estimatedElectricityOutput: 1000,
+            estimatedCO2Savings: 500,
+            estimatedRevenue: 1000,
+            estimatedROI: 0.1
+        };
+    }
 }
