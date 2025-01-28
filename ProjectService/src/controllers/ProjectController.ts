@@ -20,6 +20,7 @@ export class ProjectController {
         this.router.post(this.path, this.createProject);
         this.router.put(`${this.path}/:id`, this.updateProject);
         this.router.delete(`${this.path}/:id`, this.deleteProject);
+        this.router.post(`${this.path}/:id/investor`, this.addInvestor);
     }
 
     getAllProjects = async (_req: Request, res: Response) => {
@@ -104,6 +105,26 @@ export class ProjectController {
             }
             await ProjectService.deleteProject(id);
             res.send("Project deleted successfully");
+        } catch (error) {
+            this.logger.error(error);
+            res.status(500).send({ message: "Internal server error" });
+        }
+    };
+
+    addInvestor = async (req: Request, res: Response) => {
+        try {
+            let projectId: ObjectId;
+            try {
+                projectId = new ObjectId(req.params.id);
+            } catch (error) {
+                res.status(400).send({ message: 'Invalid project id' });
+            }
+            if (!projectId) {
+                return;
+            }
+            const { investorId, investorFirstName, investorLastName, investedAmount } = req.body;
+            const project = await ProjectService.addInvestor(projectId, investorId, investorFirstName, investorLastName, investedAmount);
+            res.send(project);
         } catch (error) {
             this.logger.error(error);
             res.status(500).send({ message: "Internal server error" });

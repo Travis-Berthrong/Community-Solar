@@ -1,10 +1,11 @@
 import { Schema, model } from 'mongoose';
 
-//TODO Add more percise geomapping data (lat & long )
 export interface IProject {
     title: string;
     description: string;
     address: string;
+    latitude: number;
+    longitude: number;
     landSize: number;
     fundingGoal: number;
     fundingCurrent: number;
@@ -19,6 +20,7 @@ export interface IProject {
     },
     investors: [{
         userId: string;
+        amount: number;
         firstName: string;
         lastName: string;
     }?],
@@ -35,6 +37,8 @@ const ProjectSchema = new Schema<IProject>({
     title: { type: String, required: true },
     description: { type: String, required: true },
     address: { type: String, required: true },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
     landSize: { type: Number, required: true },
     fundingGoal: { type: Number, required: true },
     fundingCurrent: { type: Number, required: true },
@@ -49,6 +53,7 @@ const ProjectSchema = new Schema<IProject>({
     },
     investors: [{
         userId: { type: String, required: true },
+        amount: { type: Number, required: true },
         firstName: { type: String, required: true },
         lastName: { type: String, required: true }
     }],
