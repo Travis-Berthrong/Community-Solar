@@ -15,14 +15,14 @@ export class HomeMapController {
         this.router.post(this.path, this.getHomeMap); // Post method to get home map
     }
 
-    // Controller method to fetch home map
+    // Controller method to fetch home map data
     getHomeMap = async (req: Request, res: Response) => {
         try {
-            await HomeMapService.generateMap(req, res); // Call the service to generate the map
+            const { message, data } = await HomeMapService.getHomeMapData(req); // Fetch map data
+            res.status(200).send({ message, data }); // Return the data (projects and user location)
         } catch (error) {
             this.logger.error(error);
             res.status(500).send({ message: "Internal server error" });
         }
     };
 }
-
