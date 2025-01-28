@@ -1,8 +1,6 @@
+
 {
   "expo": {
-    "extra": {
-      "GEOAPIFY_API_KEY": "@env:GEOAPIFY_API_KEY"
-    },
     "name": "FrontEnd",
     "slug": "FrontEnd",
     "version": "1.0.0",
