@@ -12,6 +12,8 @@ describe('ProjectService', () => {
             title: 'Test Project',
             description: 'Test Description',
             address: 'Test Address',
+            latitude: 0,
+            longitude: 0,
             landSize: 100,
             fundingGoal: 100000,
             fundingCurrent: 0,
