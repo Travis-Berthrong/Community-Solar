@@ -7,7 +7,8 @@ interface MapResponse {
 
 export const fetchMapData = async (coords: LocationObjectCoords): Promise<MapResponse> => {
   try {
-    const response = await fetch('https://localhost:7294/api/home-map', {
+    console.log('Fetching map data...');
+    const response = await fetch('http://localhost:3000/api/home-map', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,7 +20,7 @@ export const fetchMapData = async (coords: LocationObjectCoords): Promise<MapRes
         },
       }),
     });
-
+    console.log('Response:', response);
     if (!response.ok) {
       throw new Error('Failed to fetch map');
     }
