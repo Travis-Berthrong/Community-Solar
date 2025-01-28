@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+community_solar_logbook.xlsx/
 
 # Expo
 .expo/
@@ -30,7 +31,7 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
 
 # typescript
 *.tsbuildinfo
