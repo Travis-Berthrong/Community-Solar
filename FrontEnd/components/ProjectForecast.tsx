@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, ActivityIndicator, ScrollView, useColorScheme } from 'react-native';
 import { getStyles } from '@/styles/addprojectStyles';
+import { IProject } from '@/types/IProject';
 
 interface ProjectInfo {
   title: string;
@@ -41,36 +42,40 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
   const fetchProjectMetrics = async () => {
     setIsLoading(true);
     setError(null);
-    const testData = {
-      projectCost: 1000000,
-      estimatedElectricityOutput: 100000,
-      estimatedCO2Savings: 50,
-      estimatedRevenue: 2000000,
-      estimatedROI: 100,
-    };
-    setMetrics(testData);
-    setIsLoading(false);
+    // const testData = {
+    //   projectCost: 1000000,
+    //   estimatedElectricityOutput: 100000,
+    //   estimatedCO2Savings: 50,
+    //   estimatedRevenue: 2000000,
+    //   estimatedROI: 100,
+    // };
+    // setMetrics(testData);
+    // setIsLoading(false);
 
-    // try {
-    //   const response = await fetch('YOUR_API_ENDPOINT', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(projectInfo),
-    //   });
+    try {
+      const response = await fetch('http://localhost:8080/api/projects/forecast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectLat: projectInfo.latitude,
+          projectLong: projectInfo.longitude,
+          projectArea: projectInfo.landSize,
+        }),
+      });
 
-    //   if (!response.ok) {
-    //     throw new Error('Failed to fetch project metrics');
-    //   }
+      if (!response.ok) {
+        throw new Error('Failed to fetch project metrics');
+      }
 
-    //   const data = await response.json();
-    //   setMetrics(data);
-    // } catch (err) {
-    //   setError(err instanceof Error ? err.message : 'An error occurred');
-    // } finally {
-    //   setIsLoading(false);
-    // }
+      const data = await response.json();
+      setMetrics(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -85,6 +90,52 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
   const formatNumber = (number: number, suffix: string = '') => {
     return `${number.toLocaleString()}${suffix}`;
   };
+
+  const handleProjectCreation = async () => {
+    if (!metrics) {
+      return;
+    }
+    const projectData: IProject = {
+      title: projectInfo.title,
+      description: projectInfo.description,
+      address: projectInfo.address,
+      latitude: projectInfo.latitude,
+      longitude: projectInfo.longitude,
+      landSize: projectInfo.landSize,
+      fundingGoal: metrics.projectCost,
+      fundingCurrent: 0,
+      estimatedElectricityOutput: metrics.estimatedElectricityOutput,
+      estimatedCO2Savings: metrics.estimatedCO2Savings,
+      estimatedRevenue: metrics.estimatedRevenue,
+      estimatedROI: metrics.estimatedROI,
+      owner: {
+        userId: '123',
+        firstName: 'John',
+        lastName: 'Doe',
+      },
+      investors: [],
+      comments: [],
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create project');
+      }
+
+      alert('Project created successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -146,13 +197,16 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
               CO2 Savings: {formatNumber(metrics.estimatedCO2Savings, ' tons')}
             </Text>
           </View>
+          <Button title='Create Project'
+           onPress={handleProjectCreation}
+           color={isDarkMode ? '#4CAF50' : '#1E90FF'}
+           />
         </>
       )}
     </ScrollView>
   );
 };
 
-// Add these styles to your existing styles file
 
 
 export default ProjectForecast;
