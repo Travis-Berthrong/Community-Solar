@@ -67,4 +67,28 @@ export const getStyles = (isDarkMode: boolean) => StyleSheet.create({
       borderBottomColor: isDarkMode ? '#555555' : '#dddddd',
       color: isDarkMode ? '#ffffff' : '#000000',
     },
+      centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      section: {
+        marginTop: 20,
+        padding: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 8,
+      },
+      sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#ffffff',
+      },
+      text: {
+        fontSize: 16,
+        color: '#ffffff',
+      },
+      errorText: {
+        color: '#ff6b6b',
+        marginBottom: 15,
+      }
   });
