@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { getToken } from '../services/auth';
 import React from 'react';
+import { Text, View, StyleSheet } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,12 +40,44 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName={isLoggedIn ? 'home' : 'login'}>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="signup" options={{ headerShown: false }} />
-        <Stack.Screen name="home" options={{ headerShown: false }} />
+      <Stack
+        initialRouteName={isLoggedIn ? 'home' : 'login'}
+        screenOptions={{
+          headerTitle: () => <HeaderTitle />, // Custom header title
+          headerStyle: styles.header,
+          headerTitleAlign: 'center', // Ensures text is centered
+          headerTintColor: '#fff', // White text color
+          headerLeft: () => null, // Hides back arrow
+        }}
+      >
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="home" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
+
+// Custom Header Component
+function HeaderTitle() {
+  return <Text style={styles.headerText}>WELCOME TO COMMUNITY SOLAR</Text>;
+}
+
+// Styles for the header
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: '#2E7D32', // Green header background
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#ffffff', // White text color
+  },
+});
