@@ -73,4 +73,31 @@ describe('ProjectService', () => {
         expect(deletedProject._id).toEqual(project._id);
         expect(Project.findByIdAndDelete).toHaveBeenCalledWith(project._id);
     });
+
+    it('should add an investor to a project', async () => {
+        const investorId = 'testInvestorId';
+        const investorFirstName = 'Test';
+        const investorLastName = 'Investor';
+        const investedAmount = 1000;
+        const updatedProject = {
+            ...project,
+            investors: [
+                {
+                    userId: investorId,
+                    amount: investedAmount,
+                    firstName: investorFirstName,
+                    lastName: investorLastName
+                }
+            ],
+            fundingCurrent: investedAmount
+        } as unknown as HydratedDocument<IProject>;
+        jest.spyOn(Project, 'findByIdAndUpdate').mockResolvedValueOnce(updatedProject);
+        const res = await ProjectService.addInvestor(project._id, investorId, investorFirstName, investorLastName, investedAmount);
+        expect(res).toBeDefined();
+        expect(res.investors.length).toBeGreaterThan(0);
+        expect(res.investors[0]).not.toBeNull();
+        expect(res.investors[0]?.userId).toEqual(investorId);
+        expect(res.investors[0]?.amount).toEqual(investedAmount);
+        expect(res.fundingCurrent).toEqual(investedAmount);
+    });
 });
