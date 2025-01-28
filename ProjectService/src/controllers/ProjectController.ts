@@ -21,6 +21,7 @@ export class ProjectController {
         this.router.put(`${this.path}/:id`, this.updateProject);
         this.router.delete(`${this.path}/:id`, this.deleteProject);
         this.router.post(`${this.path}/:id/investor`, this.addInvestor);
+        this.router.post(`${this.path}/forecast`, this.forecastProject);
     }
 
     getAllProjects = async (_req: Request, res: Response) => {
@@ -125,6 +126,17 @@ export class ProjectController {
             const { investorId, investorFirstName, investorLastName, investedAmount } = req.body;
             const project = await ProjectService.addInvestor(projectId, investorId, investorFirstName, investorLastName, investedAmount);
             res.send(project);
+        } catch (error) {
+            this.logger.error(error);
+            res.status(500).send({ message: "Internal server error" });
+        }
+    };
+
+    forecastProject = async (req: Request, res: Response) => {
+        try {
+            const { projectLat, projectLong, projectArea } = req.body;
+            const forecast = await ProjectService.projectForecasting(projectLat, projectLong, projectArea);
+            res.send(forecast);
         } catch (error) {
             this.logger.error(error);
             res.status(500).send({ message: "Internal server error" });
