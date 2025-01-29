@@ -24,14 +24,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://communitysolar.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_504a6aa3ae404295b79d2e27e32384c7 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_1540ae450bd042f7a7873d80b849c7d2 }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: communitysolar.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_504a6aa3ae404295b79d2e27e32384c7 }}/travis-berthrong/community-solar-projectservice:${{ github.sha }}
+        tags: communitysolar.azurecr.io/${{ secrets.REGISTRY_USERNAME }}/travis-berthrong/community-solar-projectservice:${{ github.sha }}
         file: ./ProjectService/Dockerfile
 
   deploy:
@@ -49,4 +49,4 @@ jobs:
         app-name: 'ProjectServiceContainer'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_9e3afc162725493786fdfe40cd3e970e }}
-        images: 'communitysolar.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_504a6aa3ae404295b79d2e27e32384c7 }}/travis-berthrong/community-solar-projectservice:${{ github.sha }}'
+        images: 'communitysolar.azurecr.io/${{ secrets.REGISTRY_USERNAME }}/travis-berthrong/community-solar-projectservice:${{ github.sha }}'
