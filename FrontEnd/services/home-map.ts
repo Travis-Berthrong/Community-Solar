@@ -8,7 +8,7 @@ interface MapResponse {
 export const fetchMapData = async (coords: LocationObjectCoords): Promise<MapResponse> => {
   try {
     console.log('Fetching map data...');
-    const response = await fetch('http://localhost:3000/api/home-map', {
+    const response = await fetch('https://projectservicecontainer-b6b5efghc2c9hthk.uksouth-01.azurewebsites.net/api/home-map', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
