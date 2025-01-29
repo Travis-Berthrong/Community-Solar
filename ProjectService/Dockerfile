@@ -5,13 +5,13 @@ FROM node:20-slim
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package.json package-lock.json ./
+
+RUN npm install
 
 # Copy source code
 COPY . .
 
-# Install dependencies
-RUN npm ci
 
 # Build the application
 RUN npm run build
