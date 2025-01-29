@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - epic/Project-Service
+      - main
   workflow_dispatch:
 
 jobs:
@@ -25,9 +26,11 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+        working-directory: ./AuthService
 
       - name: dotnet publish
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        working-directory: ./AuthService
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
