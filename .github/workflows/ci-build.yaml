@@ -7,7 +7,7 @@ on:
             - 'v*'
 
 env:
-    REGISTRY: ghcr.io
+    REGISTRY: communitysolar.azurecr.io
 
 jobs:
     project-service:
@@ -24,20 +24,23 @@ jobs:
                 name: Checkout
                 uses: actions/checkout@v4
             
-            - 
-                name: Log in to the Container registry
-                uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-                with:
-                    registry: ${{ env.REGISTRY }}
-                    username: ${{ github.actor }}
-                    password: ${{ secrets.GITHUB_TOKEN }}
+            - name: 'Login via Azure CLI'
+              uses: azure/login@v1
+              with:
+                creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+            - uses: azure/docker-login@v1
+              with:
+                login-server: communitysolar.azurecr.io
+                username: ${{ secrets.REGISTRY_USERNAME }}
+                password: ${{ secrets.REGISTRY_PASSWORD }}
 
             - 
                 name: Docker meta
                 id: meta
                 uses: docker/metadata-action@v5
                 with:
-                    images: ${{ env.REGISTRY }}/${{ github.repository }}-ProjectService
+                    images: ${{ env.REGISTRY }}/${{ github.repository }}-projectservice
                     tags: |
                         type=schedule
                         type=semver,pattern={{version}}
@@ -58,3 +61,9 @@ jobs:
                     context: ./ProjectService
                     push: true
                     tags: ${{ steps.meta.outputs.tags }}
+
+            -   name: Deploy
+                uses: azure/webapps-deploy@v2
+                with:
+                    app-name: 'ProjectServiceContainer'
+                    images: ${{ env.REGISTRY }}/${{ github.repository }}-projectservice:latest
