@@ -10,7 +10,7 @@ env:
     REGISTRY: ghcr.io
 
 jobs:
-    auth:
+    project-service:
         runs-on: ubuntu-latest
 
         permissions:
@@ -37,7 +37,7 @@ jobs:
                 id: meta
                 uses: docker/metadata-action@v5
                 with:
-                    images: ${{ env.REGISTRY }}/${{ github.repository }}-AuthService
+                    images: ${{ env.REGISTRY }}/${{ github.repository }}-ProjectService
                     tags: |
                         type=schedule
                         type=semver,pattern={{version}}
