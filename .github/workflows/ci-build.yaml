@@ -62,8 +62,3 @@ jobs:
                     push: true
                     tags: ${{ steps.meta.outputs.tags }}
 
-            -   name: Deploy
-                uses: azure/webapps-deploy@v2
-                with:
-                    app-name: 'ProjectServiceContainer'
-                    images: ${{ env.REGISTRY }}/${{ github.repository }}-projectservice:latest
