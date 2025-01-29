@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 import app from "./app";
 
 config();
-const PORT = process.env.PORT || 8080;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/project-service';
+const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://myAtlasDBUser:Password1@myatlasclusteredu.5nzxbzz.mongodb.net/project-service?retryWrites=true&w=majority&appName=myAtlasClusterEDU';
 const startApp = async (): Promise<void> => {
     try {
         mongoose.connect(`${MONGO_URI}`, {
