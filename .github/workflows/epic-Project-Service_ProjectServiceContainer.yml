@@ -6,6 +6,7 @@ name: Build and deploy container app to Azure Web App - ProjectServiceContainer
 on:
   push:
     branches:
+      - main
       - epic/Project-Service
   workflow_dispatch:
 
@@ -31,7 +32,7 @@ jobs:
       with:
         push: true
         tags: communitysolar.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_504a6aa3ae404295b79d2e27e32384c7 }}/travis-berthrong/community-solar-projectservice:${{ github.sha }}
-        file: ./Dockerfile
+        file: ./ProjectService/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
