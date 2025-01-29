@@ -6,7 +6,6 @@ name: Build and deploy ASP.Net Core app to Azure Web App - AuthService
 on:
   push:
     branches:
-      - epic/Project-Service
       - main
   workflow_dispatch:
 
