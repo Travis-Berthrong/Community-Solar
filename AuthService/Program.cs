@@ -15,7 +15,7 @@ namespace AuthService
         {
             var builder = WebApplication.CreateBuilder(args);
             var authConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'AuthContextConnection' not found.");
-            builder.Services.AddDbContext<AuthDBContext>(options => options.UseNpgsql(authConnectionString));
+            builder.Services.AddDbContext<AuthDBContext>(options => options.UseSqlServer(authConnectionString));
             builder.Services.AddDefaultIdentity<User>(options => options.User.RequireUniqueEmail = true).AddEntityFrameworkStores<AuthDBContext>();
 
             var userJwtConfig = builder.Configuration.GetSection("UserJwt").Get<JwtConfig>() ?? throw new InvalidOperationException("UserJwtConfig not found.");
