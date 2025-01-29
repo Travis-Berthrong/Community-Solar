@@ -32,7 +32,8 @@ jobs:
       with:
         push: true
         tags: communitysolar.azurecr.io/${{ secrets.REGISTRY_USERNAME }}/travis-berthrong/community-solar-projectservice:${{ github.sha }}
-        file: ./ProjectService/Dockerfile
+        working-directory: ./ProjectService
+        file: ./DockerFile
 
   deploy:
     runs-on: ubuntu-latest
