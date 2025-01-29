@@ -12,5 +12,8 @@ const homeMapController = new HomeMapController();
 
 app.use("/api", projectController.router);
 app.use("/api", homeMapController.router);
+app.get("/", (_req, res) => {
+    res.send("Hello World!");
+    });
 
 export default app;
