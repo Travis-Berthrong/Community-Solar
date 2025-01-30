@@ -16,7 +16,6 @@ import MapView from "@teovilla/react-native-web-maps";
   }
 /> */}
 
-
 const personIconUrl = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn1.iconfinder.com%2Fdata%2Ficons%2Fweb-and-user-interface-21%2F512%2F3-512.png&f=1&nofb=1&ipt=c572ac349d298360adff7e7928ba5b808f97867a3685d3a096818d77ecdfda85&ipo=images';
 const projectIconUrl = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ficon-library.com%2Fimages%2Felectricity-icon-png%2Felectricity-icon-png-1.jpg&f=1&nofb=1&ipt=05dbdf5ce08ffdc3c33f33d7833638e76b59353c6bb90a8e570e82b3c3f404a0&ipo=images';
 
@@ -34,7 +33,7 @@ const MapContainer = ({ mapData }: { mapData: any }) => {
   const projectIcon = createCustomIcon(projectIconUrl);
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative'}}>
       <Map
         center={[mapData.userLocation.latitude, mapData.userLocation.longitude]}
         zoom={13}

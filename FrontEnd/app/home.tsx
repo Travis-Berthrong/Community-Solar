@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, useColorScheme, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme, Platform, TouchableOpacity, Modal } from 'react-native';
 import { Button } from '@rneui/themed';
 import { Href, router } from 'expo-router';
 import { removeToken } from '../services/auth';
@@ -25,6 +25,7 @@ export default function Home() {
   const [mapData, setMapData] = useState<any | null>(null);
   const [message, setMessage] = useState<string>('');
   const [MobileMap, setMobileMap] = useState<any | null>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -41,6 +42,10 @@ export default function Home() {
 
   const handleAddButtonPress = () => {
     router.push('/addproject' as Href);
+  };
+
+  const handleMoreInfoPress = () => {
+    setModalVisible(true);
   };
 
   const getLocation = async () => {
@@ -87,9 +92,14 @@ export default function Home() {
         {Platform.OS === 'web' && (
           <Button title="Logout" onPress={handleLogout} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
         )}
+
+        {/* Spacer to push "Info" to the right */}
+        <View style={{ flex: 4}} />
+        {/* More Info Button - Center */}
+        <Button title="More Info" onPress={handleMoreInfoPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
   
         {/* Spacer to push "Add Project" to the right */}
-        <View style={{ flex: 1 }} />
+        <View style={{ flex: -1 }} />
   
         {/* Add Project Button - Right side */}
         {Platform.OS === 'web' && (
@@ -118,6 +128,21 @@ export default function Home() {
       ) : (
         mapData && MobileMap && <MobileMap mapData={mapData} />
       )}
+
+      {/* More Info Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>This platform empowers users to accurately forecast the return on investment (ROI) of local solar installations, helping them make informed financial and energy decisions. By providing data-driven insights, it simplifies the evaluation of potential savings and benefits. Additionally, it fosters a collaborative community where users can share experiences, compare projects, and support each other in transitioning to sustainable energy solutions.</Text>
+          <Button title="Close" onPress={() => setModalVisible(!modalVisible)} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
+        </View>
+      </Modal>
     </ThemedView>
   );  
 }
@@ -133,7 +158,7 @@ const getStyles = (isDarkMode: boolean) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: 'green', // Green background
+      backgroundColor: 'green',
       paddingVertical: 20,
       paddingHorizontal: 20,
       position: 'absolute',
@@ -145,7 +170,7 @@ const getStyles = (isDarkMode: boolean) =>
     button: {
       backgroundColor: '#4CAF50',
       borderRadius: 8,
-      
+      marginHorizontal: 5,
       marginVertical: 5,
     },
     buttonTitle: {
@@ -156,5 +181,24 @@ const getStyles = (isDarkMode: boolean) =>
       padding: 10,
       borderRadius: 30,
       backgroundColor: 'transparent',
+    },
+    modalView: {
+      margin: 20,
+      backgroundColor: 'white',
+      borderRadius: 20,
+      padding: 35,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    modalText: {
+      marginBottom: 15,
+      textAlign: 'center',
     },
   });

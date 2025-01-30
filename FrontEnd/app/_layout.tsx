@@ -52,10 +52,11 @@ export default function RootLayout() {
       >
         <Stack.Screen name="login" />
         <Stack.Screen name="signup" />
-        <Stack.Screen name="home" options={{headerShown:false}}/>
-        <Stack.Screen name="addproject" options={{headerShown: false}} />
+        <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="addproject" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
+      {<Footer />}
     </ThemeProvider>
   );
 }
@@ -65,7 +66,16 @@ function HeaderTitle() {
   return <Text style={styles.headerText}>WELCOME TO COMMUNITY SOLAR</Text>;
 }
 
-// Styles for the header
+// Custom Footer Component
+function Footer() {
+  return (
+    <View style={styles.footer}>
+      <Text style={styles.headerText}>WELCOME TO COMMUNITY SOLAR</Text>
+    </View>
+  );
+}
+
+// Styles for the header and footer
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#2E7D32', // Green header background
@@ -80,5 +90,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#ffffff', // White text color
+  },
+  footer: {
+    backgroundColor: '#2E7D32', // Green footer background
+    padding: 10,
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
