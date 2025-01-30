@@ -10,13 +10,11 @@ import { fetchMapData } from '../services/home-map';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedView } from '@/components/ThemedView';
 
-// Lazy load React Leaflet Map for web
 let MapContainer: any;
 let MobileMap: any;
 if (Platform.OS === 'web') {
   MapContainer = React.lazy(() => import('../components/MapContainer.web'));
 }
-
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -35,7 +33,6 @@ export default function Home() {
         .catch((error) => console.error("Error loading MobileMap:", error));
     }
   }, []);
-
 
   const handleLogout = async () => {
     await removeToken();
@@ -85,24 +82,32 @@ export default function Home() {
   return (
     <ThemedView style={styles.container}>
       {/* Navbar */}
-      <ThemedView style={{...styles.navbar, top: Platform.OS === 'web' ? 0 : 20}}>
-        <ThemedView style={styles.navbarButtons}>
-          { Platform.OS === 'web' && (
-            <>
-            <Button title="Logout" onPress={handleLogout} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
-            <Button title="Add Project" onPress={handleAddButtonPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
-            </>
-          )}
-            <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
-              <IconSymbol name="rectangle.portrait.and.arrow.right" size={28} color='green' />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleAddButtonPress} style={styles.iconButton}>
-              <IconSymbol name="plus.circle.fill" size={28} color='green' />
-            </TouchableOpacity>
-        </ThemedView>
+      <ThemedView style={styles.navbar}>
+        {/* Logout Button - Left side */}
+        {Platform.OS === 'web' && (
+          <Button title="Logout" onPress={handleLogout} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
+        )}
+  
+        {/* Spacer to push "Add Project" to the right */}
+        <View style={{ flex: 1 }} />
+  
+        {/* Add Project Button - Right side */}
+        {Platform.OS === 'web' && (
+          <Button title="Add Project" onPress={handleAddButtonPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
+        )}
+  
+        {/* Mobile Icon Buttons */}
+        <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+          <IconSymbol name="rectangle.portrait.and.arrow.right" size={28} color="green" />
+        </TouchableOpacity>
+  
+        <View style={{ flex: -1 }} />
+  
+        <TouchableOpacity onPress={handleAddButtonPress} style={styles.iconButton}>
+          <IconSymbol name="plus.circle.fill" size={28} color="green" />
+        </TouchableOpacity>
       </ThemedView>
-
+  
       {/* Show React Leaflet on Web, react-native-maps on Mobile */}
       {Platform.OS === 'web' ? (
         mapData && (
@@ -110,40 +115,37 @@ export default function Home() {
             <MapContainer mapData={mapData} />
           </React.Suspense>
         )
-        ) : (
-          mapData && MobileMap && <MobileMap mapData={mapData} />
-        )}
-      </ThemedView>
-    );
-  }
+      ) : (
+        mapData && MobileMap && <MobileMap mapData={mapData} />
+      )}
+    </ThemedView>
+  );  
+}
 
 const getStyles = (isDarkMode: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-      paddingTop: 80, // Space for navbar
+      paddingTop: 80, 
     },
     navbar: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: isDarkMode ? '#222222' : '#f0f0f0',
-      padding: 20,
+      backgroundColor: 'green', // Green background
+      paddingVertical: 20,
+      paddingHorizontal: 20,
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       zIndex: 1,
     },
-    navbarButtons: {
-      flexDirection: 'row',
-      gap: 15,
-      marginLeft: 'auto',
-    },
     button: {
-      backgroundColor: 'green',
-      borderRadius: 5,
+      backgroundColor: '#4CAF50',
+      borderRadius: 8,
+      
       marginVertical: 5,
     },
     buttonTitle: {
@@ -154,7 +156,5 @@ const getStyles = (isDarkMode: boolean) =>
       padding: 10,
       borderRadius: 30,
       backgroundColor: 'transparent',
-    }
-    
+    },
   });
-
