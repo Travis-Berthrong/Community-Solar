@@ -26,6 +26,7 @@ export const fetchMapData = async (coords: LocationObjectCoords): Promise<MapRes
     }
 
     const data = await response.json();
+    console.log('Map data:', data);
     return { message: data.message, data: data.data }; // Return message and data (user location and projects)
   } catch (error) {
     console.error('Error fetching map:', error);

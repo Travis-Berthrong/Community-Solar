@@ -1,62 +1,50 @@
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-defaulticon-compatibility';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
-import L, { icon } from 'leaflet';
 import React from 'react';
-import { MapContainer as Map, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Image, Text, Platform } from 'react-native';
 
-const personIconUrl = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn1.iconfinder.com%2Fdata%2Ficons%2Fweb-and-user-interface-21%2F512%2F3-512.png&f=1&nofb=1&ipt=c572ac349d298360adff7e7928ba5b808f97867a3685d3a096818d77ecdfda85&ipo=images';
-const projectIconUrl = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP.nquIUunTQTXsPxVfLr4JAgHaHa%26pid%3DApi&f=1&ipt=6928bd04a68749b9349357c85ed79e026724c3a7b8bb7002707eb5bd51c5cc94&ipo=images';
+let MapView: any;
+let Marker: any;
 
-// Custom marker icon configuration for Leaflet using images
-const createCustomIcon = (iconUrl: string) =>
-  L.icon({
-    iconUrl,
-    iconSize: [30, 30],  // Adjust the size of the marker
-    iconAnchor: [15, 30],  // Anchor the icon in the correct position
-    popupAnchor: [0, -30],  // Position the popup above the icon
-  });
+if (Platform.OS === 'ios' || Platform.OS === 'android') {
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+}
 
-const MapContainer = ({ mapData }: { mapData: any }) => {
-  const userIcon = createCustomIcon(personIconUrl);
-  const projectIcon = createCustomIcon(projectIconUrl);
+export const MobileMap = ({ mapData }: { mapData: any }) => {
+  const personIconUrl = 'https://cdn1.iconfinder.com/data/icons/web-and-user-interface-21/512/3-512.png';
+  const projectIconUrl = 'https://tse4.mm.bing.net/th?id=OIP.nquIUunTQTXsPxVfLr4JAgHaHa&pid=Api';
+
+  if (!mapData) return <Text>Loading map...</Text>;
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <Map
-        center={[mapData.userLocation.latitude, mapData.userLocation.longitude]}
-        zoom={13}
-        scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%' }}
+    <MapView
+      style={{ flex: 1 }}
+      initialRegion={{
+        latitude: mapData.userLocation.latitude,
+        longitude: mapData.userLocation.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }}
+    >
+      {/* User location marker */}
+      <Marker
+        coordinate={{ latitude: mapData.userLocation.latitude, longitude: mapData.userLocation.longitude }}
+        title="You are here"
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <Image source={{ uri: personIconUrl }} style={{ width: 30, height: 30 }} />
+      </Marker>
+
+      {/* Project markers */}
+      {mapData.projects.map((project: any, index: number) => (
         <Marker
-          position={[mapData.userLocation.latitude, mapData.userLocation.longitude]}
-          icon={userIcon}
+          key={project._id || index}
+          coordinate={{ latitude: project.latitude, longitude: project.longitude }}
+          title={project.title}
+          description={`Creator: ${project.owner} - Funds: ${project.fundingCurrent}/${project.fundingGoal}`}
         >
-          <Popup maxWidth={300}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold' }}>You are here</div>
-          </Popup>
+          <Image source={{ uri: projectIconUrl }} style={{ width: 30, height: 30 }} />
         </Marker>
-        {mapData.projects.map((project: any, index: number) => (
-          <Marker
-            key={index}
-            position={[project.latitude, project.longitude]}
-            icon={projectIcon}
-          >
-            <Popup maxWidth={300}>
-              <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{project.title}</div>
-              <div>{`Creator: ${project.owner}`}</div>
-              <div>{`Funds Raised: ${project.fundingCurrent} / ${project.fundingGoal}`}</div>
-            </Popup>
-          </Marker>
-        ))}
-      </Map>
-    </div>
+      ))}
+    </MapView>
   );
 };
-
-export default MapContainer;
