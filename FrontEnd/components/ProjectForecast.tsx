@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, StyleSheet, Animated, Modal } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useColorScheme } from 'react-native';
 import { getStyles } from '@/styles/addprojectStyles';
@@ -27,6 +27,9 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const styles = getStyles(isDarkMode);
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
     fetchProjectMetrics();
@@ -77,32 +80,54 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
     if (!metrics) return;
 
     try {
+      const requestBody = JSON.stringify({
+        title: projectInfo.title,
+        description: projectInfo.description,
+        address: projectInfo.address,
+        latitude: projectInfo.latitude,
+        longitude: projectInfo.longitude,
+        landSize: projectInfo.landSize,
+        fundingGoal: metrics.projectCost,
+        fundingCurrent: 0,
+        estimatedElectricityOutput: metrics.estimatedElectricityOutput,
+        estimatedCO2Savings: metrics.estimatedCO2Savings,
+        estimatedRevenue: metrics.estimatedRevenue,
+        estimatedROI: metrics.estimatedROI,
+        owner: {
+          firstName: 'John',
+          lastName: 'Doe',
+          userId: '12345',
+        },
+        investors: [],
+        comments: [],
+      });
+      console.log('Request Body:', requestBody);
       const response = await fetch('https://projectservicecontainer-b6b5efghc2c9hthk.uksouth-01.azurewebsites.net/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title: projectInfo.title,
-          description: projectInfo.description,
-          address: projectInfo.address,
-          latitude: projectInfo.latitude,
-          longitude: projectInfo.longitude,
-          landSize: projectInfo.landSize,
-          fundingGoal: metrics.projectCost,
-          estimatedElectricityOutput: metrics.estimatedElectricityOutput,
-          estimatedCO2Savings: metrics.estimatedCO2Savings,
-          estimatedRevenue: metrics.estimatedRevenue,
-          estimatedROI: metrics.estimatedROI,
-        }),
+        body: requestBody,
       });
+      console.log('Response:', response);
+      console.log('Response JSON:', await response.json());
 
       if (!response.ok) {
         throw new Error('Failed to create project');
       }
 
-      alert('Project created successfully');
-      router.push('/home');
+      setShowSuccessModal(true);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+
+      // Automatically close after 2 seconds and navigate home
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        router.push('/home');
+      }, 2000);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'An error occurred');
     }
@@ -130,6 +155,14 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Modal visible={showSuccessModal} transparent animationType="fade">
+        <View style={modalStyles.overlay}>
+          <Animated.View style={[modalStyles.modalContainer, { opacity: fadeAnim }]}>
+            <Ionicons name="checkmark-circle-outline" size={50} color="green" />
+            <Text style={modalStyles.successText}>Project Created Successfully!</Text>
+          </Animated.View>
+        </View>
+      </Modal>
       <View style={styles.card}>
         {/* Back Button */}
         <TouchableOpacity onPress={onBack} style={buttonStyles.backButton}>
@@ -206,6 +239,29 @@ const buttonStyles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 250,
+  },
+  successText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'green',
+    marginTop: 10,
   },
 });
 
