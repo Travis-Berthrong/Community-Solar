@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'https://localhost:7294/api/User';
+const API_URL = 'https://authservice-enbjagg9d6enh5gg.uksouth-01.azurewebsites.net/api/User';
 
 export const login = async (email: string, password: string) => {
     const response = await fetch(`${API_URL}/login`, {
