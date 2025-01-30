@@ -87,12 +87,13 @@ export default function Home() {
       {/* Navbar */}
       <ThemedView style={{...styles.navbar, top: Platform.OS === 'web' ? 0 : 20}}>
         <ThemedView style={styles.navbarButtons}>
-          { Platform.OS === 'web' && (
+          { Platform.OS === 'web' ? (
             <>
             <Button title="Logout" onPress={handleLogout} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
             <Button title="Add Project" onPress={handleAddButtonPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
             </>
-          )}
+          ) : (
+            <>
             <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
               <IconSymbol name="rectangle.portrait.and.arrow.right" size={28} color='green' />
             </TouchableOpacity>
@@ -100,6 +101,8 @@ export default function Home() {
             <TouchableOpacity onPress={handleAddButtonPress} style={styles.iconButton}>
               <IconSymbol name="plus.circle.fill" size={28} color='green' />
             </TouchableOpacity>
+            </>
+          )}
         </ThemedView>
       </ThemedView>
 
