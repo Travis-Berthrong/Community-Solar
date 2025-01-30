@@ -51,10 +51,13 @@ export default function Signup() {
     setIsFetching(true);
 
     try {
+      console.log('Fetching address suggestions for:', query);
       const response = await fetch(
         `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_API_KEY}`
       );
+      console.log('Response:', response);
       const data = await response.json();
+      console.log('Address suggestions:', data);
       setAddressSuggestions(data.features.map((feature: any) => feature.properties.formatted));
     } catch (error) {
       console.error('Error fetching address suggestions:', error);

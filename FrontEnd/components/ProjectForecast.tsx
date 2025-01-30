@@ -38,7 +38,7 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3000/api/projects/forecast', {
+      const response = await fetch('https://projectservicecontainer-b6b5efghc2c9hthk.uksouth-01.azurewebsites.net/api/projects/forecast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/projects', {
+      const response = await fetch('https://projectservicecontainer-b6b5efghc2c9hthk.uksouth-01.azurewebsites.net/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

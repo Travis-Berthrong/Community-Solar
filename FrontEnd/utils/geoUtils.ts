@@ -44,6 +44,7 @@ export const fetchCoordinates = async (address: string): Promise<{ latitude: num
       const response = await fetch(
         `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_API_KEY}`
       );
+      console.log('Response:', response);
       const data = await response.json();
 
       if ("features" in data) {

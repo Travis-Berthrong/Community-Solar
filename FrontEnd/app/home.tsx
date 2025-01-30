@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, useColorScheme, Platform } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme, Platform, TouchableOpacity } from 'react-native';
 import { Button } from '@rneui/themed';
 import { Href, router } from 'expo-router';
 import { removeToken } from '../services/auth';
 import * as Location from 'expo-location';
 import 'leaflet/dist/leaflet.css';
 import { fetchMapData } from '../services/home-map';
+
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { ThemedView } from '@/components/ThemedView';
+
+// Lazy load React Leaflet Map for web
+let MapContainer: any;
+let MobileMap: any;
+if (Platform.OS === 'web') {
+  MapContainer = React.lazy(() => import('../components/MapContainer.web'));
+}
+
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -15,6 +26,16 @@ export default function Home() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [mapData, setMapData] = useState<any | null>(null);
   const [message, setMessage] = useState<string>('');
+  const [MobileMap, setMobileMap] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      import('@/components/MapContainer')
+        .then((module) => setMobileMap(() => module.MobileMap))
+        .catch((error) => console.error("Error loading MobileMap:", error));
+    }
+  }, []);
+
 
   const handleLogout = async () => {
     await removeToken();
@@ -40,7 +61,7 @@ export default function Home() {
   };
 
   const fetchMap = async () => {
-    if (!location) return; // Ensure location is available before making request
+    if (!location) return;
     try {
       const { message, data } = await fetchMapData(location.coords);
       setMessage(message);
@@ -61,48 +82,47 @@ export default function Home() {
     }
   }, [location]);
 
-  const MapContainer = React.useMemo(() => {
-    if (Platform.OS === 'web') {
-      return React.lazy(() => import('../components/MapContainer'));
-    }
-    return () => null;
-  }, []);
-
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {/* Navbar */}
-      <View style={styles.navbar}>
-        <View style={styles.navbarButtons}>
-          <Button 
-            title="Logout" 
-            onPress={handleLogout} 
-            buttonStyle={styles.button} 
-            titleStyle={styles.buttonTitle}
-          />
-          <Button 
-            title="Add Project" 
-            onPress={handleAddButtonPress} 
-            buttonStyle={styles.button} 
-            titleStyle={styles.buttonTitle}
-          />
-        </View>
-      </View>
-      {/* MapContainer from React Leaflet */}
-      {mapData && (
-        <React.Suspense fallback={<View>Loading...</View>}>
-          <MapContainer mapData={mapData} />
-        </React.Suspense>
-      )}
-    </View>
-  );
-}
+      <ThemedView style={{...styles.navbar, top: Platform.OS === 'web' ? 0 : 20}}>
+        <ThemedView style={styles.navbarButtons}>
+          { Platform.OS === 'web' && (
+            <>
+            <Button title="Logout" onPress={handleLogout} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
+            <Button title="Add Project" onPress={handleAddButtonPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
+            </>
+          )}
+            <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+              <IconSymbol name="rectangle.portrait.and.arrow.right" size={28} color='green' />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleAddButtonPress} style={styles.iconButton}>
+              <IconSymbol name="plus.circle.fill" size={28} color='green' />
+            </TouchableOpacity>
+        </ThemedView>
+      </ThemedView>
+
+      {/* Show React Leaflet on Web, react-native-maps on Mobile */}
+      {Platform.OS === 'web' ? (
+        mapData && (
+          <React.Suspense fallback={<View><Text>Loading...</Text></View>}>
+            <MapContainer mapData={mapData} />
+          </React.Suspense>
+        )
+        ) : (
+          mapData && MobileMap && <MobileMap mapData={mapData} />
+        )}
+      </ThemedView>
+    );
+  }
 
 const getStyles = (isDarkMode: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-      paddingTop: 80, // To create space for the navbar
+      paddingTop: 80, // Space for navbar
     },
     navbar: {
       flexDirection: 'row',
@@ -116,29 +136,25 @@ const getStyles = (isDarkMode: boolean) =>
       right: 0,
       zIndex: 1,
     },
-    navbarTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: isDarkMode ? '#ffffff' : '#000000',
-    },
     navbarButtons: {
       flexDirection: 'row',
-      gap: 15, // Adjust gap between buttons
-      marginLeft: 'auto', // Align buttons to the right
+      gap: 15,
+      marginLeft: 'auto',
     },
     button: {
-      backgroundColor: 'green', // Green background color
-      borderRadius: 5, // Optional: add rounded corners
-      marginVertical: 5, // Add vertical margin to buttons
+      backgroundColor: 'green',
+      borderRadius: 5,
+      marginVertical: 5,
     },
     buttonTitle: {
-      color: 'white', // White text color
-      fontWeight: 'bold', // Optional: add bold text for better visibility
+      color: 'white',
+      fontWeight: 'bold',
     },
-    title: {
-      fontSize: 24,
-      marginBottom: 20,
-      textAlign: 'center',
-      color: isDarkMode ? '#ffffff' : '#000000',
-    },
+    iconButton: {
+      padding: 10,
+      borderRadius: 30,
+      backgroundColor: 'transparent',
+    }
+    
   });
+
