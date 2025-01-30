@@ -44,7 +44,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={({ route }) => ({
             headerShown: route.name === 'login' || route.name === 'signup' || route.name === 'addproject',
-            headerTitle: () => <HeaderTitle />,
+            headerTitle: () => <HeaderTitle headerText={(route.name === 'login' || route.name === 'signup') && Platform.OS === 'web' ? 'WELCOME TO COMMUNITY SOLAR !': 'COMMUNITY SOLAR'}/>,
             headerStyle: styles.header,
             headerTitleAlign: 'center',
             headerTintColor: '#fff',
@@ -107,14 +107,14 @@ export default function RootLayout() {
   );
 }
 
-function HeaderTitle() {
+function HeaderTitle({ headerText }: { readonly headerText?: string }) {
   return (
     <View style={[
       styles.headerContainer,
       Platform.OS === 'ios' ? { marginBottom: 10 } : null
     ]}>
       <Text style={styles.headerText}>
-        {Platform.OS === 'web' ? 'WELCOME TO COMMUNITY SOLAR !' : 'COMMUNITY SOLAR'}
+        {headerText ?? 'COMMUNITY SOLAR'}
       </Text>
     </View>
   );
