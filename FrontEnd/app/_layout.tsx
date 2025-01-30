@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { getToken } from '../services/auth';
-
 import { Text, View, StyleSheet, Platform } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
@@ -43,26 +42,59 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <>
         <Stack
-          screenOptions={{
+          screenOptions={({ route }) => ({
+            headerShown: route.name === 'login' || route.name === 'signup' || route.name === 'addproject',
             headerTitle: () => <HeaderTitle />,
             headerStyle: styles.header,
             headerTitleAlign: 'center',
             headerTintColor: '#fff',
             headerLeft: () => null,
-          }}
+          })}
         >
           {!isLoggedIn ? (
             <>
-              <Stack.Screen name="login" />
-              <Stack.Screen name="signup" />
+              <Stack.Screen 
+                name="login" 
+                options={{
+                  headerShown: true,
+                  headerTitle: () => <HeaderTitle />,
+                  headerStyle: styles.header,
+                  headerTitleAlign: 'center',
+                  headerTintColor: '#fff',
+                  headerLeft: () => null,
+                }}
+              />
+              <Stack.Screen 
+                name="signup"
+                options={{
+                  headerShown: true,
+                  headerTitle: () => <HeaderTitle />,
+                  headerStyle: styles.header,
+                  headerTitleAlign: 'center',
+                  headerTintColor: '#fff',
+                  headerLeft: () => null,
+                }}
+              />
               <Stack.Screen name="index" redirect={true} />
               <Stack.Screen name="home" redirect={true} />
-              <Stack.Screen name="addproject" redirect={true} />
+              <Stack.Screen name="addproject" redirect={true} options={{
+                headerShown: true,
+                headerTitle: () => <HeaderTitle />,
+                headerStyle: styles.header,
+                headerTitleAlign: 'center',
+                headerTintColor: '#fff',
+              }} />
             </>
           ) : (
             <>
-              <Stack.Screen name="home" options={{ headerShown: false }} />
-              <Stack.Screen name="addproject" options={{ headerShown: false }} />
+              <Stack.Screen name="home" />
+              <Stack.Screen name="addproject" options={{
+                headerShown: true,
+                headerTitle: () => <HeaderTitle />,
+                headerStyle: styles.header,
+                headerTitleAlign: 'center',
+                headerTintColor: '#fff',
+              }} />
               <Stack.Screen name="login" redirect={true} />
               <Stack.Screen name="signup" redirect={true} />
               <Stack.Screen name="index" redirect={true} />
@@ -81,7 +113,9 @@ function HeaderTitle() {
       styles.headerContainer,
       Platform.OS === 'ios' ? { marginBottom: 10 } : null
     ]}>
-      <Text style={styles.headerText}>{Platform.OS === 'web' ? 'WELCOME TO COMMUNITY SOLAR !' : 'COMMUNITY SOLAR'}</Text>
+      <Text style={styles.headerText}>
+        {Platform.OS === 'web' ? 'WELCOME TO COMMUNITY SOLAR !' : 'COMMUNITY SOLAR'}
+      </Text>
     </View>
   );
 }
