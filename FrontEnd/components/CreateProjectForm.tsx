@@ -17,6 +17,7 @@ const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSubmit, initial
   const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const addressInputRef = useRef(null);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
@@ -110,61 +111,76 @@ const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSubmit, initial
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
     >
-      <Text style={styles.label}>Title</Text>
-      <TextInput
-        value={title}
-        onChangeText={setTitle}
-        placeholder="Enter project title"
-        placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-        style={styles.input}
-      />
+        <View style={styles.card}>
+            <Text style={styles.label}>Title</Text>
+            <TextInput
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Enter project title"
+                placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+                style={[styles.input, focusedInput === 'title' && styles.inputFocused]}
+                onFocus={() => setFocusedInput('title')}
+                onBlur={() => setFocusedInput(null)}
+            />
 
-      <Text style={styles.label}>Description</Text>
-      <TextInput
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Enter project description"
-        placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-        multiline
-        style={styles.input}
-      />
-      <View style={styles.addressContainer}>
-        <Text style={styles.label}>Address</Text>
-        <TextInput
-          ref={addressInputRef}
-          value={address}
-          onChangeText={(value) => {
-            setAddress(value);
-            displayAddressSuggestions(value);
-          }}
-          onFocus={() => {
-            if (address && addressSuggestions.length > 0) {
-              setDropdownVisible(true);
-            }
-          }}
-          placeholder="Enter project address"
-          placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-          style={styles.input}
-        />
-        <AddressSuggestionsDropdown />
-      </View>
 
-      <Text style={styles.label}>Land Size (sq meters)</Text>
-      <TextInput
-        value={landSize}
-        onChangeText={setLandSize}
-        placeholder="Enter land size"
-        placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-        keyboardType="numeric"
-        style={styles.input}
-      />
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Enter project description"
+                multiline
+                placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+                style={[styles.input, focusedInput === 'description' && styles.inputFocused]}
+                onFocus={() => setFocusedInput('description')}
+                onBlur={() => setFocusedInput(null)}
+            />
 
-      <Button title="View Forecast" onPress={handleSubmit} color={isDarkMode ? '#4CAF50' : '#1E90FF'} />      
+            <View style={styles.addressContainer}>
+                <Text style={styles.label}>Address</Text>
+                <TextInput
+                    ref={addressInputRef}
+                    value={address}
+                    onChangeText={(value) => {
+                        setAddress(value);
+                        displayAddressSuggestions(value);
+                    }}
+                    onFocus={() => {
+                        setFocusedInput('address');
+                        if (address && addressSuggestions.length > 0) {
+                            setDropdownVisible(true);
+                        }
+                    }}
+                    onBlur={() => {
+                        setFocusedInput(null);
+                    }}
+                    placeholder="Enter project address"
+                    placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+                    style={[styles.input, focusedInput === 'address' && styles.inputFocused]}
+                    />
+                <AddressSuggestionsDropdown />
+            </View>
+
+            <Text style={styles.label}>Land Size (sq meters)</Text>
+            <TextInput
+                value={landSize}
+                onChangeText={setLandSize}
+                placeholder="Enter land size"
+                keyboardType="numeric"
+                placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+                style={[styles.input, focusedInput === 'landsize' && styles.inputFocused]}
+                onFocus={() => setFocusedInput('landsize')}
+                onBlur={() => setFocusedInput(null)}
+            />
+
+            <Button title="View Forecast" onPress={handleSubmit} color={isDarkMode ? '#4CAF50' : '#1E90FF'} />
+        </View>
     </KeyboardAvoidingView>
-  );
+);
 };
 
-export default CreateProjectForm;
+export default CreateProjectForm

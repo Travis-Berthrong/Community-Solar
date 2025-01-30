@@ -1,9 +1,8 @@
 import React from 'react';
 import { Image, Text, Platform } from 'react-native';
-
+import { IconSymbol } from '@/components/ui/IconSymbol';
 let MapView: any;
 let Marker: any;
-
 if (Platform.OS === 'ios' || Platform.OS === 'android') {
   const Maps = require('react-native-maps');
   MapView = Maps.default;
@@ -11,10 +10,38 @@ if (Platform.OS === 'ios' || Platform.OS === 'android') {
 }
 
 export const MobileMap = ({ mapData }: { mapData: any }) => {
-  const personIconUrl = 'https://cdn1.iconfinder.com/data/icons/web-and-user-interface-21/512/3-512.png';
-  const projectIconUrl = 'https://tse4.mm.bing.net/th?id=OIP.nquIUunTQTXsPxVfLr4JAgHaHa&pid=Api';
-
   if (!mapData) return <Text>Loading map...</Text>;
+  
+  const renderUserMarker = () => {
+    if (Platform.OS === 'ios') {
+      return (
+        <IconSymbol
+          name="location.fill"
+          size={30}
+          color="#007AFF"
+          style={{ transform: [{ scale: 1.2 }] }}
+        />
+      );
+    } else {
+      return (
+        <IconSymbol
+          name="location"
+          size={30}
+          color="#4285F4"
+          style={{ transform: [{ scale: 1.2 }] }}
+        />
+      );
+    }
+  };
+
+  const renderProjectMarker = () => (
+    <IconSymbol
+      name="bolt.circle.fill"
+      size={30}
+      color="#34C759"
+      style={{ transform: [{ scale: 1.2 }] }}
+    />
+  );
 
   return (
     <MapView
@@ -28,21 +55,27 @@ export const MobileMap = ({ mapData }: { mapData: any }) => {
     >
       {/* User location marker */}
       <Marker
-        coordinate={{ latitude: mapData.userLocation.latitude, longitude: mapData.userLocation.longitude }}
+        coordinate={{
+          latitude: mapData.userLocation.latitude,
+          longitude: mapData.userLocation.longitude
+        }}
         title="You are here"
       >
-        <Image source={{ uri: personIconUrl }} style={{ width: 30, height: 30 }} />
+        {renderUserMarker()}
       </Marker>
-
+      
       {/* Project markers */}
       {mapData.projects.map((project: any, index: number) => (
         <Marker
           key={project._id || index}
-          coordinate={{ latitude: project.latitude, longitude: project.longitude }}
+          coordinate={{
+            latitude: project.latitude,
+            longitude: project.longitude
+          }}
           title={project.title}
           description={`Creator: ${project.owner} - Funds: ${project.fundingCurrent}/${project.fundingGoal}`}
         >
-          <Image source={{ uri: projectIconUrl }} style={{ width: 30, height: 30 }} />
+          {renderProjectMarker()}
         </Marker>
       ))}
     </MapView>
