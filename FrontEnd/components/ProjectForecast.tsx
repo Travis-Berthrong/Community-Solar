@@ -4,6 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useColorScheme } from 'react-native';
 import { getStyles } from '@/styles/addprojectStyles';
 import { useRouter } from 'expo-router';
+import { getToken } from '@/services/auth';
 
 interface ProjectMetrics {
   projectCost: number;
@@ -18,10 +19,17 @@ interface ProjectForecastProps {
   onBack: () => void;
 }
 
+interface UserInfo {
+  firstName: string;
+  lastName: string;
+  userId: string;
+}
+
 const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }) => {
   const [metrics, setMetrics] = useState<ProjectMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const router = useRouter();
 
   const colorScheme = useColorScheme();
@@ -33,7 +41,41 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
 
   useEffect(() => {
     fetchProjectMetrics();
+    fetchCurrentUserInfo();
   }, []);
+
+  const fetchCurrentUserInfo = async () => {
+    try {
+      const userToken = await getToken();
+      console.log('User Token:', userToken);
+      if (!userToken) {
+        throw new Error('User token not found');
+      }
+      const response = await fetch('https://authservice-enbjagg9d6enh5gg.uksouth-01.azurewebsites.net/api/User/me', {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      console.log('User Info Response:', response);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      const data = await response.json();
+      console.log('User Info:', data);
+      setUserInfo({
+        userId: data.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      })
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      setUserInfo({
+        firstName: 'John',
+        lastName: 'Doe',
+        userId: '12345',
+      })
+    }
+  };
 
   const fetchProjectMetrics = async () => {
     setIsLoading(true);
@@ -94,9 +136,9 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
         estimatedRevenue: metrics.estimatedRevenue,
         estimatedROI: metrics.estimatedROI,
         owner: {
-          firstName: 'John',
-          lastName: 'Doe',
-          userId: '12345',
+          firstName: userInfo?.firstName ?? 'John',
+          lastName: userInfo?.lastName ?? 'Doe',
+          userId: userInfo?.userId ?? '12345',
         },
         investors: [],
         comments: [],
