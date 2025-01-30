@@ -52,7 +52,6 @@ export default class ProjectService {
         const PANEL_COST_PER_M2 = 150; // Cost per m² for panels and mounting
         const INSTALLATION_COST_MULTIPLIER = 1.3; // Installation cost multiplier
     
-        // Calculate available solar energy based on latitude
         const calculateSolarIrradiance = (latitude: number): number => {
             // Adjust solar constant based on latitude
             const latitudeRadians = Math.abs(latitude) * (Math.PI / 180);
@@ -76,13 +75,10 @@ export default class ProjectService {
             return annualEnergy;
         };
     
-        // Calculate project costs
         const calculateProjectCosts = (area: number, annualEnergy: number) => {
-            // Equipment and installation costs
             const equipmentCost = area * PANEL_COST_PER_M2;
             const totalInstallationCost = equipmentCost * INSTALLATION_COST_MULTIPLIER;
             
-            // Annual maintenance costs
             const systemCapacityKW = (annualEnergy / 365.25) / 4; // Rough estimate of system capacity
             const annualMaintenance = systemCapacityKW * MAINTENANCE_COST_PER_KW;
             
@@ -92,7 +88,6 @@ export default class ProjectService {
             };
         };
     
-        // Calculate financial metrics
         const calculateFinancials = (annualEnergy: number, costs: { totalInstallationCost: number, annualMaintenance: number }) => {
             let totalRevenue = 0;
             let totalCosts = costs.totalInstallationCost;
@@ -100,14 +95,11 @@ export default class ProjectService {
     
             // Calculate lifetime revenue and costs
             for (let year = 0; year < PROJECT_LIFETIME; year++) {
-                // Calculate revenue for the year
                 const yearlyRevenue = currentEnergyOutput * ELECTRICITY_PRICE;
                 totalRevenue += yearlyRevenue;
     
-                // Add maintenance costs
                 totalCosts += costs.annualMaintenance;
     
-                // Account for panel degradation
                 currentEnergyOutput *= (1 - PANEL_DEGRADATION);
             }
     
@@ -121,36 +113,30 @@ export default class ProjectService {
             };
         };
     
-        // Calculate CO2 savings
         const calculateCO2Savings = (annualEnergy: number) => {
             const CO2_PER_KWH = 0.4; // Average CO2 emissions per kWh from traditional sources (kg)
             return annualEnergy * CO2_PER_KWH;
         };
     
         try {
-            // Validate inputs
             if (!projectLat || !projectArea || projectArea <= 0) {
                 throw new Error('Invalid input parameters');
             }
     
-            // Calculate annual energy production
             const annualEnergy = calculateSystemPerformance(projectArea, projectLat);
     
-            // Calculate project costs
             const costs = calculateProjectCosts(projectArea, annualEnergy);
     
-            // Calculate financial metrics
             const financials = calculateFinancials(annualEnergy, costs);
     
-            // Calculate CO2 savings
             const annualCO2Savings = calculateCO2Savings(annualEnergy);
     
             return {
                 projectCost: Math.round(costs.totalInstallationCost),
                 estimatedElectricityOutput: Math.round(annualEnergy),
                 estimatedCO2Savings: Math.round(annualCO2Savings),
-                estimatedRevenue: Math.round(financials.totalRevenue / PROJECT_LIFETIME), // Average annual revenue
-                estimatedROI: Math.round(financials.roi * 100) / 100 // ROI as percentage with 2 decimal places
+                estimatedRevenue: Math.round(financials.totalRevenue / PROJECT_LIFETIME),
+                estimatedROI: Math.round(financials.roi * 100) / 100
             };
     
         } catch (error) {

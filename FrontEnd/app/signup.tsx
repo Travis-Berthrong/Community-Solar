@@ -109,6 +109,7 @@ export default function Signup() {
               <TextInput
                 style={[signupStyles.input, focusedField === 'Address' && signupStyles.focusedInput]}
                 placeholder="Enter your address"
+                placeholderTextColor="#888"
                 value={address}
                 onChangeText={(text) => {
                   setAddress(text);
@@ -138,6 +139,7 @@ export default function Signup() {
             <TextInput
               style={[signupStyles.input, focusedField === fields[currentStep].label && signupStyles.focusedInput]}
               placeholder={fields[currentStep].placeholder}
+              placeholderTextColor="#888"
               value={fields[currentStep].value}
               onChangeText={fields[currentStep].setValue}
               keyboardType={(fields[currentStep].keyboardType as KeyboardTypeOptions) || 'default'}

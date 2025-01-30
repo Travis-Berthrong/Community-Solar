@@ -187,7 +187,7 @@ const ProjectForecast: React.FC<ProjectForecastProps> = ({ projectInfo, onBack }
                 <Ionicons name="cash-outline" size={20} color="green" /> Financial Metrics
               </Text>
               <Text style={styles.label}>Project Cost: {formatCurrency(metrics.projectCost)}</Text>
-              <Text style={styles.label}>Estimated Revenue: {formatCurrency(metrics.estimatedRevenue)}</Text>
+              <Text style={styles.label}>Estimated Annual Revenue: {formatCurrency(metrics.estimatedRevenue)}</Text>
               <Text style={styles.label}>ROI: {formatNumber(metrics.estimatedROI, '%')}</Text>
             </View>
 
