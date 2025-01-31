@@ -1,7 +1,5 @@
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { Stack} from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import 'react-native-reanimated';
@@ -11,7 +9,6 @@ import { Text, View, StyleSheet, Platform } from 'react-native';
 import "../global.css";
 import { Theme, ThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { NAV_THEME } from '~/lib/constants';
 
 SplashScreen.preventAutoHideAsync();
