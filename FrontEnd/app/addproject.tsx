@@ -35,6 +35,7 @@ export default function AddProjectPage() {
             <Ionicons name="chevron-back" size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
+
       ),
     });
   }, [navigation]);

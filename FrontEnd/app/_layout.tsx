@@ -1,5 +1,8 @@
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { Stack} from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/lib/useColorScheme';
@@ -160,7 +163,6 @@ function HeaderTitle({ headerText }: { readonly headerText?: string }) {
 
 const useIsomorphicLayoutEffect =
 Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
-
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#2E7D32',
