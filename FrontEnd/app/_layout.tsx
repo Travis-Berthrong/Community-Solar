@@ -41,7 +41,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack
-        initialRouteName={isLoggedIn ? 'home' : 'login'}
+        initialRouteName={isLoggedIn ? 'home' : 'index'}
         screenOptions={{
           headerTitle: () => <HeaderTitle />, // Custom header title
           headerStyle: styles.header,
@@ -50,6 +50,7 @@ export default function RootLayout() {
           headerLeft: () => null, // Hides back arrow
         }}
       >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" />
         <Stack.Screen name="signup" />
         <Stack.Screen name="home" options={{ headerShown: false }} />
