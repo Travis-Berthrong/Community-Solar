@@ -22,6 +22,7 @@ export class ProjectController {
         this.router.delete(`${this.path}/:id`, this.deleteProject);
         this.router.post(`${this.path}/:id/investor`, this.addInvestor);
         this.router.post(`${this.path}/forecast`, this.forecastProject);
+        this.router.post(`${this.path}/:id/comment`, this.addComment.bind(this));
     }
 
     getAllProjects = async (_req: Request, res: Response) => {
@@ -131,6 +132,29 @@ export class ProjectController {
             res.status(500).send({ message: "Internal server error" });
         }
     };
+
+    addComment = async (req: Request, res: Response) => {
+    try {
+        let projectId: ObjectId;
+        try {
+            projectId = new ObjectId(req.params.id);
+        } catch (error) {
+            return res.status(400).send({ message: 'Invalid project id' });
+        }
+
+        const { userId, firstName, lastName, comment } = req.body;
+        if (!userId || !firstName || !lastName || !comment) {
+            return res.status(400).send({ message: "Missing required fields" });
+        }
+
+        const updatedProject = await ProjectService.addComment(projectId, userId, firstName, lastName, comment);
+        res.send(updatedProject);
+    } catch (error) {
+        this.logger.error(error);
+        res.status(500).send({ message: "Internal server error" });
+    }
+};
+
 
     forecastProject = async (req: Request, res: Response) => {
         try {
