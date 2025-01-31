@@ -16,7 +16,6 @@ interface IComment {
     firstName: string;
     lastName: string;
     comment: string;
-    commentDate: Date;
 }
 
 
@@ -119,7 +118,6 @@ export default function ProjectPage() {
         firstName: userInfo.firstName,
         lastName: userInfo.lastName,
         comment: newMessage,
-        commentDate: new Date(),
       }]);
       setNewMessage('');
     }
@@ -167,7 +165,7 @@ export default function ProjectPage() {
               setInvestorModalFormVisible(!investorModalFormVisible);
             }}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Card style={{ ...styles.card, width:'30%', height: '20%'}}>
+              <Card style={{ ...styles.card, width: width > 768 ? '30%' : '90%', height: '20%'}}>
                 <Pressable style={{ position: 'absolute', top: 8, right: 8 }} onPress={toggleInvestorModalForm}>
                   <Ionicons name="close" size={24} color="red" />
                 </Pressable>
@@ -197,7 +195,7 @@ export default function ProjectPage() {
               </Card>
               </View>
             </Modal>
-        <Card style={{ ...styles.card, width: width > 768 ? '55%' : '90%', height: '90%'}}>
+        <Card style={{ ...styles.card, width: width > 768 ? '55%' : '90%'}}>
             <Text style={styles.cardTitle}>Project Description</Text>
             <Text style={styles.description}>{project.description}</Text>
             <View style={styles.infoGrid}>
@@ -252,7 +250,6 @@ export default function ProjectPage() {
             <View style={styles.messageContent}>
               <Text style={styles.userName}>{comment.firstName} {comment.lastName}</Text>
               <Text style={styles.message}>{comment.comment}</Text>
-              <Text style={styles.message}>{comment.commentDate.toUTCString()}</Text>
             </View>
           </View>
         ))}
