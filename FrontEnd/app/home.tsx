@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, useColorScheme, Platform, TouchableOpacity, Modal } from 'react-native';
 import { Button } from '@rneui/themed';
 import { Href, router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { removeToken } from '../services/auth';
 import * as Location from 'expo-location';
 import 'leaflet/dist/leaflet.css';
@@ -84,6 +85,15 @@ export default function Home() {
     }
   }, [location]);
 
+  // Custom Footer Component
+  function Footer() {
+    return (
+      <View style={styles.footer}>
+        <Text style={styles.headerText}>WELCOME TO COMMUNITY SOLAR</Text>
+      </View>
+    );
+  }
+
   return (
     <ThemedView style={styles.container}>
       {/* Navbar */}
@@ -94,30 +104,21 @@ export default function Home() {
         )}
 
         {/* Spacer to push "Info" to the right */}
-        <View style={{ flex: 4}} />
+        <View style={{ flex: 4 }} />
         {/* More Info Button - Center */}
         <Button title="More Info" onPress={handleMoreInfoPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
-  
+
         {/* Spacer to push "Add Project" to the right */}
         <View style={{ flex: -1 }} />
-  
+
         {/* Add Project Button - Right side */}
         {Platform.OS === 'web' && (
           <Button title="Add Project" onPress={handleAddButtonPress} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
         )}
-  
-        {/* Mobile Icon Buttons */}
-        <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
-          <IconSymbol name="rectangle.portrait.and.arrow.right" size={28} color="green" />
-        </TouchableOpacity>
-  
-        <View style={{ flex: -1 }} />
-  
-        <TouchableOpacity onPress={handleAddButtonPress} style={styles.iconButton}>
-          <IconSymbol name="plus.circle.fill" size={28} color="green" />
-        </TouchableOpacity>
+
+        <StatusBar style="auto" />
       </ThemedView>
-  
+
       {/* Show React Leaflet on Web, react-native-maps on Mobile */}
       {Platform.OS === 'web' ? (
         mapData && (
@@ -143,8 +144,10 @@ export default function Home() {
           <Button title="Close" onPress={() => setModalVisible(!modalVisible)} buttonStyle={styles.button} titleStyle={styles.buttonTitle} />
         </View>
       </Modal>
+
+      <Footer />
     </ThemedView>
-  );  
+  );
 }
 
 const getStyles = (isDarkMode: boolean) =>
@@ -152,7 +155,8 @@ const getStyles = (isDarkMode: boolean) =>
     container: {
       flex: 1,
       backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-      paddingTop: 80, 
+      paddingTop: 80,
+      justifyContent: 'space-between', // Ensure footer is at the bottom
     },
     navbar: {
       flexDirection: 'row',
@@ -200,5 +204,19 @@ const getStyles = (isDarkMode: boolean) =>
     modalText: {
       marginBottom: 15,
       textAlign: 'center',
+    },
+    footer: {
+      backgroundColor: '#2E7D32', // Green footer background
+      padding: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+    },
+    headerText: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: '#ffffff', // White text color
     },
   });
