@@ -40,23 +40,128 @@ export default class ProjectService {
         }, { new: true });
     }
 
-    public static async projectForecasting(_projectLat: number, _projectLong: number, _projectArea: number) {
-        // This function will calculate the estimated electricity output, CO2 savings, revenue, and ROI for a project
-        // based on the project's latitude, longitude, and land size.
-        // The calculation will be based on the project's location and size, and will use a predefined algorithm
-        // to estimate the project's performance.
-        // The estimated values will be returned as an object with the following properties:
-        // - estimatedElectricityOutput: number
-        // - estimatedCO2Savings: number
-        // - estimatedRevenue: number
-        // - estimatedROI: number
+    public static async addComment(
+        projectId: ObjectId,
+        userId: string,
+        firstName: string,
+        lastName: string,
+        comment: string
+    ): Promise<HydratedDocument<IProject>> {
+        return await Project.findByIdAndUpdate(projectId, {
+            $push: {
+                comments: {
+                    userId,
+                    firstName,
+                    lastName,
+                    comment,
+                    commentDate: new Date()
+                }
+            }
+        }, { new: true });
+    }
 
-        return {
-            projectCost: 10000,
-            estimatedElectricityOutput: 1000,
-            estimatedCO2Savings: 500,
-            estimatedRevenue: 1000,
-            estimatedROI: 0.1
+    public static async projectForecasting(projectLat: number, _projectLong: number, projectArea: number) {
+        // Constants for solar calculations
+        const SOLAR_CONSTANT = 1361; // Solar constant in W/m²
+        const PANEL_EFFICIENCY = 0.20; // Modern solar panel efficiency (20%)
+        const SYSTEM_LOSSES = 0.14; // System losses (inverter, wiring, etc.)
+        const PANEL_DEGRADATION = 0.005; // Annual panel degradation rate (0.5%)
+        const PROJECT_LIFETIME = 25; // Project lifetime in years
+        const MAINTENANCE_COST_PER_KW = 20; // Annual maintenance cost per kW
+        const ELECTRICITY_PRICE = 0.12; // Average electricity price per kWh
+        const PANEL_COST_PER_M2 = 150; // Cost per m² for panels and mounting
+        const INSTALLATION_COST_MULTIPLIER = 1.3; // Installation cost multiplier
+    
+        const calculateSolarIrradiance = (latitude: number): number => {
+            // Adjust solar constant based on latitude
+            const latitudeRadians = Math.abs(latitude) * (Math.PI / 180);
+            const atmosphericLoss = Math.cos(latitudeRadians);
+            const seasonalAdjustment = 0.85; // Account for seasonal variations
+            return SOLAR_CONSTANT * atmosphericLoss * seasonalAdjustment;
         };
+    
+        // Calculate system capacity and performance
+        const calculateSystemPerformance = (area: number, latitude: number) => {
+            const dailyIrradiance = calculateSolarIrradiance(latitude);
+            const hoursOfSunlight = Math.max(8 - Math.abs(latitude) / 10, 4); // Estimate sunlight hours based on latitude
+            const systemEfficiency = PANEL_EFFICIENCY * (1 - SYSTEM_LOSSES);
+            
+            // Daily energy production in kWh
+            const dailyEnergy = (dailyIrradiance * area * systemEfficiency * hoursOfSunlight) / 1000;
+            
+            // Annual energy production in kWh
+            const annualEnergy = dailyEnergy * 365.25;
+            
+            return annualEnergy;
+        };
+    
+        const calculateProjectCosts = (area: number, annualEnergy: number) => {
+            const equipmentCost = area * PANEL_COST_PER_M2;
+            const totalInstallationCost = equipmentCost * INSTALLATION_COST_MULTIPLIER;
+            
+            const systemCapacityKW = (annualEnergy / 365.25) / 4; // Rough estimate of system capacity
+            const annualMaintenance = systemCapacityKW * MAINTENANCE_COST_PER_KW;
+            
+            return {
+                totalInstallationCost,
+                annualMaintenance
+            };
+        };
+    
+        const calculateFinancials = (annualEnergy: number, costs: { totalInstallationCost: number, annualMaintenance: number }) => {
+            let totalRevenue = 0;
+            let totalCosts = costs.totalInstallationCost;
+            let currentEnergyOutput = annualEnergy;
+    
+            // Calculate lifetime revenue and costs
+            for (let year = 0; year < PROJECT_LIFETIME; year++) {
+                const yearlyRevenue = currentEnergyOutput * ELECTRICITY_PRICE;
+                totalRevenue += yearlyRevenue;
+    
+                totalCosts += costs.annualMaintenance;
+    
+                currentEnergyOutput *= (1 - PANEL_DEGRADATION);
+            }
+    
+            const totalProfit = totalRevenue - totalCosts;
+            const roi = (totalProfit / costs.totalInstallationCost) * 100;
+    
+            return {
+                totalRevenue,
+                totalProfit,
+                roi
+            };
+        };
+    
+        const calculateCO2Savings = (annualEnergy: number) => {
+            const CO2_PER_KWH = 0.4; // Average CO2 emissions per kWh from traditional sources (kg)
+            return annualEnergy * CO2_PER_KWH;
+        };
+    
+        try {
+            if (!projectLat || !projectArea || projectArea <= 0) {
+                throw new Error('Invalid input parameters');
+            }
+    
+            const annualEnergy = calculateSystemPerformance(projectArea, projectLat);
+    
+            const costs = calculateProjectCosts(projectArea, annualEnergy);
+    
+            const financials = calculateFinancials(annualEnergy, costs);
+    
+            const annualCO2Savings = calculateCO2Savings(annualEnergy);
+    
+            return {
+                projectCost: Math.round(costs.totalInstallationCost),
+                estimatedElectricityOutput: Math.round(annualEnergy),
+                estimatedCO2Savings: Math.round(annualCO2Savings),
+                estimatedRevenue: Math.round(financials.totalRevenue / PROJECT_LIFETIME),
+                estimatedROI: Math.round(financials.roi * 100) / 100
+            };
+    
+        } catch (error) {
+            console.error('Error in project forecasting:', error);
+            throw error;
+        }
     }
 }
