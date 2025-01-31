@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Platform, Animated, Modal, Pressable } from 'react-native';
 import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { IProjectResponse } from '@/types/IProject';
-import { HeaderTitle } from '@/components/HeaderTitle';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Ionicons } from '@expo/vector-icons';
 import { getToken } from '@/services/auth';
-import { addComment } from '@/services/comment'; // Import the addComment function
+import { addComment } from '@/services/comment';
+import { handleAddInvestorRequest } from '@/services/investors';
+import { IAddInvestor } from '@/types/IAddInvestor';
 
 interface IComment {
     _id?: number;
@@ -16,8 +17,9 @@ interface IComment {
     firstName: string;
     lastName: string;
     comment: string;
-    commentDate: Date;
 }
+
+
 
 const { width } = Dimensions.get('window');
 
@@ -33,6 +35,14 @@ export default function ProjectPage() {
   });
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
+  const [investorModalFormVisible, setInvestorModalFormVisible] = useState(false);
+  const [addInvestorForm, setAddInvestorForm] = useState<IAddInvestor>({
+    investorId: '',
+    investorFirstName: '',
+    investorLastName: '',
+    investedAmount: 0,
+  });
+  
 
   useEffect(() => {
     fetchProjectData();
@@ -49,22 +59,41 @@ export default function ProjectPage() {
       console.error('Error fetching project:', error);
     }
   }
-
-  const fetchCurrentUserInfo = async () => {
-    try {
-      const userToken = await getToken();
-      console.log('User Token:', userToken);
-      if (!userToken) {
-        throw new Error('User token not found');
-      }
-      const response = await fetch('https://authservice-enbjagg9d6enh5gg.uksouth-01.azurewebsites.net/api/User/me', {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-      console.log('User Info Response:', response);
-      if (!response.ok) {
-        throw new Error('Failed to fetch user info');
+    const fetchCurrentUserInfo = async () => {
+      try {
+        const userToken = await getToken();
+        console.log('User Token:', userToken);
+        if (!userToken) {
+          throw new Error('User token not found');
+        }
+        const response = await fetch('https://authservice-enbjagg9d6enh5gg.uksouth-01.azurewebsites.net/api/User/me', {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        console.log('User Info Response:', response);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user info');
+        }
+        const data = await response.json();
+        console.log('User Info:', data);
+        setUserInfo({
+          userId: data.id,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        })
+        setAddInvestorForm({
+          investorId: data.id,
+          investorFirstName: data.firstName,
+          investorLastName: data.lastName,
+        });
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+        setUserInfo({
+          firstName: 'John',
+          lastName: 'Doe',
+          userId: '12345',
+        })
       }
       const data = await response.json();
       console.log('User Info:', data);
@@ -103,11 +132,26 @@ export default function ProjectPage() {
       } catch (error) {
         console.error('Error adding comment:', error);
       }
+  const handleAddInvestor = async () => {
+    try {
+      await handleAddInvestorRequest(addInvestorForm, id as string);
+
+      fetchProjectData();
+      setInvestorModalFormVisible(false);
+      setAddInvestorForm({ ...addInvestorForm, investedAmount: 0 });
+    } catch (error) {
+      console.error('Error adding investor:', error);
+    }
+  };
     }
   };
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
+  };
+
+  const toggleInvestorModalForm = () => {
+    setInvestorModalFormVisible(!investorModalFormVisible);
   };
 
   if (!project) {
@@ -135,8 +179,46 @@ export default function ProjectPage() {
         <Text style={styles.title}>{project.title}</Text>
         <Text style={styles.author}>Proposed by {project.owner.firstName} {project.owner.lastName}</Text>
       </View>
-      <View style={styles.cardsContainer}>
-        <Card style={{ ...styles.card, width: width > 768 ? '55%' : '90%', height: '90%'}}>
+        <View style={styles.cardsContainer}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={investorModalFormVisible}
+            onRequestClose={() => {
+              setInvestorModalFormVisible(!investorModalFormVisible);
+            }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Card style={{ ...styles.card, width: width > 768 ? '30%' : '90%', height: '20%'}}>
+                <Pressable style={{ position: 'absolute', top: 8, right: 8 }} onPress={toggleInvestorModalForm}>
+                  <Ionicons name="close" size={24} color="red" />
+                </Pressable>
+                <Text style={styles.cardTitle}>Add Investment</Text>
+                <TextInput
+                  value={addInvestorForm?.investedAmount?.toString() ?? ''}
+                  onChangeText={(text) => {
+                    const cleanedText = text.replace(/[^\d.]/g, '');
+                    setAddInvestorForm({ 
+                      ...addInvestorForm, 
+                      investedAmount: parseFloat(cleanedText) || 0 
+                    });
+                  }}
+                  placeholder="Investment Amount"
+                  keyboardType='numeric'
+                  style={[styles.input, styles.investmentInput, {
+                    textAlign: 'left',
+                    paddingHorizontal: 12,
+                    height: 40,
+                    maxHeight: 40
+                  }]}
+                />
+                <Button onPress={handleAddInvestor} style={[styles.button, { backgroundColor: 'green', marginTop: 20 }]}>
+                  <Ionicons name="add" size={16} color="#fff" />
+                  <Text style={styles.buttonText}>Add Investment</Text>
+                </Button>
+              </Card>
+              </View>
+            </Modal>
+        <Card style={{ ...styles.card, width: width > 768 ? '55%' : '90%'}}>
             <Text style={styles.cardTitle}>Project Description</Text>
             <Text style={styles.description}>{project.description}</Text>
             <View style={styles.infoGrid}>
@@ -166,18 +248,18 @@ export default function ProjectPage() {
               ${project.fundingCurrent.toLocaleString()} raised of ${project.fundingGoal.toLocaleString()} goal
             </Text>
             <View style={styles.buttonGroup}>
-              <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
-                  <Ionicons name="people-outline" size={16} color="#fff" />
-                  <Text style={styles.buttonText}>{project.investors.toLocaleString()} Investors</Text>
-              </Button>
-              <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
-                  <Ionicons name="cash-outline" size={16} color="#fff" />
-                  <Text style={styles.buttonText}>Donate Now</Text>
-              </Button>
-              <Button onPress={toggleFavorite} style={[styles.button, { backgroundColor: 'green' }]}>
-                  <Ionicons name="heart" size={16} color={isFavorite ? "#ff0000" : "#fff"} />
-                  <Text style={styles.buttonText}>{isFavorite ? "Favorited" : "Add to Favorites"}</Text>
-              </Button>
+            <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
+                <Ionicons name="people-outline" size={16} color="#fff" />
+                <Text style={styles.buttonText}>{project.investors.length} Investors</Text>
+            </Button>
+            <Button onPress={toggleInvestorModalForm} style={[styles.button, { backgroundColor: 'green' }]}>
+                <Ionicons name="cash-outline" size={16} color="#fff" />
+                <Text style={styles.buttonText}>Donate Now</Text>
+            </Button>
+            <Button onPress={toggleFavorite} style={[styles.button, { backgroundColor: 'green' }]}>
+                <Ionicons name="heart" size={16} color={isFavorite ? "#ff0000" : "#fff"} />
+                <Text style={styles.buttonText}>{isFavorite ? "Favorited" : "Add to Favorites"}</Text>
+            </Button>
             </View>
         </Card>
       </View>
@@ -190,7 +272,6 @@ export default function ProjectPage() {
             <View style={styles.messageContent}>
               <Text style={styles.userName}>{comment.firstName} {comment.lastName}</Text>
               <Text style={styles.message}>{comment.comment}</Text>
-              <Text style={styles.message}>{comment.commentDate.toUTCString()}</Text>
             </View>
           </View>
         ))}
@@ -331,4 +412,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start', // Aligns items to the start (left)
     alignItems: 'flex-start', // Ensures alignment with comments card
   },
+  investmentInput: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderColor: '#4CAF50', // Green border to match the theme
+    borderWidth: 1.5,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  
 });
