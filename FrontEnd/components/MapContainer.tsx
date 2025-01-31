@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Text, Platform } from 'react-native';
+import { Image, Text, Platform, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 let MapView: any;
 let Marker: any;
@@ -74,6 +75,7 @@ export const MobileMap = ({ mapData }: { mapData: any }) => {
           }}
           title={project.title}
           description={`Creator: ${project.owner} - Funds: ${project.fundingCurrent}/${project.fundingGoal}`}
+          onCalloutPress={() => (router.push({ pathname: `/projects/[id]`, params: { id: project.id } }))}
         >
           {renderProjectMarker()}
         </Marker>

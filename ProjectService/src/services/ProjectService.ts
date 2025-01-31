@@ -40,6 +40,26 @@ export default class ProjectService {
         }, { new: true });
     }
 
+    public static async addComment(
+        projectId: ObjectId,
+        userId: string,
+        firstName: string,
+        lastName: string,
+        comment: string
+    ): Promise<HydratedDocument<IProject>> {
+        return await Project.findByIdAndUpdate(projectId, {
+            $push: {
+                comments: {
+                    userId,
+                    firstName,
+                    lastName,
+                    comment,
+                    commentDate: new Date()
+                }
+            }
+        }, { new: true });
+    }
+
     public static async projectForecasting(projectLat: number, _projectLong: number, projectArea: number) {
         // Constants for solar calculations
         const SOLAR_CONSTANT = 1361; // Solar constant in W/m²

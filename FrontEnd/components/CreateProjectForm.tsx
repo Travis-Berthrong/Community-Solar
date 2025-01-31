@@ -177,7 +177,7 @@ const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSubmit, initial
                 onBlur={() => setFocusedInput(null)}
             />
 
-            <Button title="View Forecast" onPress={handleSubmit} color={isDarkMode ? '#4CAF50' : '#1E90FF'} />
+            <Button title="View Forecast" onPress={handleSubmit} color={'#4CAF50'} />
         </View>
     </KeyboardAvoidingView>
 );
