@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Ionicons } from '@expo/vector-icons';
 import { getToken } from '@/services/auth';
+import { addComment } from '@/services/comment'; // Import the addComment function
 
 interface IComment {
     _id?: number;
@@ -20,17 +21,16 @@ interface IComment {
 
 const { width } = Dimensions.get('window');
 
-
 export default function ProjectPage() {
   const [project, setProject] = useState<IProjectResponse | null>(null);
   const [comments, setComments] = useState<IComment[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-    const [userInfo, setUserInfo] = useState({
-        userId: '',
-        firstName: '',
-        lastName: '',
-    });
+  const [userInfo, setUserInfo] = useState({
+      userId: '',
+      firstName: '',
+      lastName: '',
+  });
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
 
@@ -50,49 +50,59 @@ export default function ProjectPage() {
     }
   }
 
-    const fetchCurrentUserInfo = async () => {
-      try {
-        const userToken = await getToken();
-        console.log('User Token:', userToken);
-        if (!userToken) {
-          throw new Error('User token not found');
-        }
-        const response = await fetch('https://authservice-enbjagg9d6enh5gg.uksouth-01.azurewebsites.net/api/User/me', {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
-        console.log('User Info Response:', response);
-        if (!response.ok) {
-          throw new Error('Failed to fetch user info');
-        }
-        const data = await response.json();
-        console.log('User Info:', data);
-        setUserInfo({
-          userId: data.id,
-          firstName: data.firstName,
-          lastName: data.lastName,
-        })
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        setUserInfo({
-          firstName: 'John',
-          lastName: 'Doe',
-          userId: '12345',
-        })
+  const fetchCurrentUserInfo = async () => {
+    try {
+      const userToken = await getToken();
+      console.log('User Token:', userToken);
+      if (!userToken) {
+        throw new Error('User token not found');
       }
-    };
+      const response = await fetch('https://authservice-enbjagg9d6enh5gg.uksouth-01.azurewebsites.net/api/User/me', {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      console.log('User Info Response:', response);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      const data = await response.json();
+      console.log('User Info:', data);
+      setUserInfo({
+        userId: data.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      })
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      setUserInfo({
+        firstName: 'John',
+        lastName: 'Doe',
+        userId: '12345',
+      })
+    }
+  };
 
-  const handleSubmitMessage = () => {
+  const handleSubmitMessage = async () => {
     if (newMessage.trim()) {
-      setComments([...comments, {
-        userId: userInfo.userId,
-        firstName: userInfo.firstName,
-        lastName: userInfo.lastName,
-        comment: newMessage,
-        commentDate: new Date(),
-      }]);
-      setNewMessage('');
+      try {
+        const comment = {
+          userId: userInfo.userId,
+          firstName: userInfo.firstName,
+          lastName: userInfo.lastName,
+          comment: newMessage,
+          commentDate: new Date(),
+        };
+
+        // Call the addComment API
+        await addComment(id as string, userInfo.userId, userInfo.firstName, userInfo.lastName, newMessage);
+
+        // Update the local state with the new comment
+        setComments([...comments, comment]);
+        setNewMessage('');
+      } catch (error) {
+        console.error('Error adding comment:', error);
+      }
     }
   };
 
@@ -111,13 +121,13 @@ export default function ProjectPage() {
       <Stack.Screen
         options={{
           headerTitle: () => (""),
-      headerLeft: () => (
-        <View style={styles.headerLeftContainer}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
-      ),
+          headerLeft: () => (
+            <View style={styles.headerLeftContainer}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Ionicons name="chevron-back" size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+          ),
         }}
       />
       
@@ -125,28 +135,27 @@ export default function ProjectPage() {
         <Text style={styles.title}>{project.title}</Text>
         <Text style={styles.author}>Proposed by {project.owner.firstName} {project.owner.lastName}</Text>
       </View>
-        <View style={styles.cardsContainer}>
+      <View style={styles.cardsContainer}>
         <Card style={{ ...styles.card, width: width > 768 ? '55%' : '90%', height: '90%'}}>
             <Text style={styles.cardTitle}>Project Description</Text>
             <Text style={styles.description}>{project.description}</Text>
             <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-                <Ionicons name="location-outline" size={16} color="green" />
-                <Text style={styles.infoText}>{project.address}</Text>
-            </View>
-            <View style={styles.infoItem}>
-                <Ionicons name="map-outline" size={16} color="green" />
-                <Text style={styles.infoText}>Land Area: {project.landSize} m²</Text>
-
-            </View>
-            <View style={styles.infoItem}>
-                <Ionicons name="trending-up-outline" size={16} color="green" />
-                <Text style={styles.infoText}>ROI: {project.estimatedROI} %</Text>
-            </View>
-            <View style={styles.infoItem}>
-                <Ionicons name="flash-outline" size={16} color="green" />
-                <Text style={styles.infoText}>Output: {project.estimatedElectricityOutput}</Text>
-            </View>
+              <View style={styles.infoItem}>
+                  <Ionicons name="location-outline" size={16} color="green" />
+                  <Text style={styles.infoText}>{project.address}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                  <Ionicons name="map-outline" size={16} color="green" />
+                  <Text style={styles.infoText}>Land Area: {project.landSize} m²</Text>
+              </View>
+              <View style={styles.infoItem}>
+                  <Ionicons name="trending-up-outline" size={16} color="green" />
+                  <Text style={styles.infoText}>ROI: {project.estimatedROI} %</Text>
+              </View>
+              <View style={styles.infoItem}>
+                  <Ionicons name="flash-outline" size={16} color="green" />
+                  <Text style={styles.infoText}>Output: {project.estimatedElectricityOutput}</Text>
+              </View>
             </View>
         </Card>
 
@@ -154,24 +163,24 @@ export default function ProjectPage() {
             <Text style={styles.cardTitle}>Funding Progress</Text>
             <Progress value={fundingProgress} style={styles.progress} />
             <Text style={styles.fundingText}>
-            ${project.fundingCurrent.toLocaleString()} raised of ${project.fundingGoal.toLocaleString()} goal
+              ${project.fundingCurrent.toLocaleString()} raised of ${project.fundingGoal.toLocaleString()} goal
             </Text>
             <View style={styles.buttonGroup}>
-            <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
-                <Ionicons name="people-outline" size={16} color="#fff" />
-                <Text style={styles.buttonText}>{project.investors.toLocaleString()} Investors</Text>
-            </Button>
-            <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
-                <Ionicons name="cash-outline" size={16} color="#fff" />
-                <Text style={styles.buttonText}>Donate Now</Text>
-            </Button>
-            <Button onPress={toggleFavorite} style={[styles.button, { backgroundColor: 'green' }]}>
-                <Ionicons name="heart" size={16} color={isFavorite ? "#ff0000" : "#fff"} />
-                <Text style={styles.buttonText}>{isFavorite ? "Favorited" : "Add to Favorites"}</Text>
-            </Button>
+              <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
+                  <Ionicons name="people-outline" size={16} color="#fff" />
+                  <Text style={styles.buttonText}>{project.investors.toLocaleString()} Investors</Text>
+              </Button>
+              <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
+                  <Ionicons name="cash-outline" size={16} color="#fff" />
+                  <Text style={styles.buttonText}>Donate Now</Text>
+              </Button>
+              <Button onPress={toggleFavorite} style={[styles.button, { backgroundColor: 'green' }]}>
+                  <Ionicons name="heart" size={16} color={isFavorite ? "#ff0000" : "#fff"} />
+                  <Text style={styles.buttonText}>{isFavorite ? "Favorited" : "Add to Favorites"}</Text>
+              </Button>
             </View>
         </Card>
-        </View>
+      </View>
 
       <Card style={{ ...styles.card, width: '92%', marginHorizontal: 16 }}>
         <Text style={styles.cardTitle}>Comment Forum</Text>
@@ -202,16 +211,16 @@ export default function ProjectPage() {
 }
 
 const styles = StyleSheet.create({
-    headerLeftContainer: {
-        position: 'absolute',
-        left: width * 0.15, 
-        zIndex: 1, 
-      },
-      backButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-      },
+  headerLeftContainer: {
+      position: 'absolute',
+      left: width * 0.15, 
+      zIndex: 1, 
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 10,
+    },
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -322,5 +331,4 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start', // Aligns items to the start (left)
     alignItems: 'flex-start', // Ensures alignment with comments card
   },
-  
 });
