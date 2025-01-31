@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Platform, Animated, Modal, Pressable } from 'react-native';
 import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { IProjectResponse } from '@/types/IProject';
-import { HeaderTitle } from '@/components/HeaderTitle';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Ionicons } from '@expo/vector-icons';
 import { getToken } from '@/services/auth';
+import { handleAddInvestorRequest } from '@/services/investors';
+import { IAddInvestor } from '@/types/IAddInvestor';
 
 interface IComment {
     _id?: number;
@@ -17,6 +18,8 @@ interface IComment {
     comment: string;
     commentDate: Date;
 }
+
+
 
 const { width } = Dimensions.get('window');
 
@@ -33,6 +36,14 @@ export default function ProjectPage() {
     });
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
+  const [investorModalFormVisible, setInvestorModalFormVisible] = useState(false);
+  const [addInvestorForm, setAddInvestorForm] = useState<IAddInvestor>({
+    investorId: '',
+    investorFirstName: '',
+    investorLastName: '',
+    investedAmount: 0,
+  });
+  
 
   useEffect(() => {
     fetchProjectData();
@@ -73,6 +84,11 @@ export default function ProjectPage() {
           firstName: data.firstName,
           lastName: data.lastName,
         })
+        setAddInvestorForm({
+          investorId: data.id,
+          investorFirstName: data.firstName,
+          investorLastName: data.lastName,
+        });
       } catch (error) {
         console.error('Error fetching user info:', error);
         setUserInfo({
@@ -82,6 +98,19 @@ export default function ProjectPage() {
         })
       }
     };
+
+  const handleAddInvestor = async () => {
+    try {
+      await handleAddInvestorRequest(addInvestorForm, id as string);
+
+      fetchProjectData();
+      setInvestorModalFormVisible(false);
+      setAddInvestorForm({ ...addInvestorForm, investedAmount: 0 });
+    } catch (error) {
+      console.error('Error adding investor:', error);
+    }
+  };
+
 
   const handleSubmitMessage = () => {
     if (newMessage.trim()) {
@@ -98,6 +127,10 @@ export default function ProjectPage() {
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
+  };
+
+  const toggleInvestorModalForm = () => {
+    setInvestorModalFormVisible(!investorModalFormVisible);
   };
 
   if (!project) {
@@ -126,6 +159,44 @@ export default function ProjectPage() {
         <Text style={styles.author}>Proposed by {project.owner.firstName} {project.owner.lastName}</Text>
       </View>
         <View style={styles.cardsContainer}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={investorModalFormVisible}
+            onRequestClose={() => {
+              setInvestorModalFormVisible(!investorModalFormVisible);
+            }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Card style={{ ...styles.card, width:'30%', height: '20%'}}>
+                <Pressable style={{ position: 'absolute', top: 8, right: 8 }} onPress={toggleInvestorModalForm}>
+                  <Ionicons name="close" size={24} color="red" />
+                </Pressable>
+                <Text style={styles.cardTitle}>Add Investment</Text>
+                <TextInput
+                  value={addInvestorForm?.investedAmount?.toString() ?? ''}
+                  onChangeText={(text) => {
+                    const cleanedText = text.replace(/[^\d.]/g, '');
+                    setAddInvestorForm({ 
+                      ...addInvestorForm, 
+                      investedAmount: parseFloat(cleanedText) || 0 
+                    });
+                  }}
+                  placeholder="Investment Amount"
+                  keyboardType='numeric'
+                  style={[styles.input, styles.investmentInput, {
+                    textAlign: 'left',
+                    paddingHorizontal: 12,
+                    height: 40,
+                    maxHeight: 40
+                  }]}
+                />
+                <Button onPress={handleAddInvestor} style={[styles.button, { backgroundColor: 'green', marginTop: 20 }]}>
+                  <Ionicons name="add" size={16} color="#fff" />
+                  <Text style={styles.buttonText}>Add Investment</Text>
+                </Button>
+              </Card>
+              </View>
+            </Modal>
         <Card style={{ ...styles.card, width: width > 768 ? '55%' : '90%', height: '90%'}}>
             <Text style={styles.cardTitle}>Project Description</Text>
             <Text style={styles.description}>{project.description}</Text>
@@ -159,9 +230,9 @@ export default function ProjectPage() {
             <View style={styles.buttonGroup}>
             <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
                 <Ionicons name="people-outline" size={16} color="#fff" />
-                <Text style={styles.buttonText}>{project.investors.toLocaleString()} Investors</Text>
+                <Text style={styles.buttonText}>{project.investors.length} Investors</Text>
             </Button>
-            <Button onPress={() => {}} style={[styles.button, { backgroundColor: 'green' }]}>
+            <Button onPress={toggleInvestorModalForm} style={[styles.button, { backgroundColor: 'green' }]}>
                 <Ionicons name="cash-outline" size={16} color="#fff" />
                 <Text style={styles.buttonText}>Donate Now</Text>
             </Button>
@@ -321,6 +392,15 @@ const styles = StyleSheet.create({
     flexDirection: width > 768 ? 'row' : 'column',
     justifyContent: 'flex-start', // Aligns items to the start (left)
     alignItems: 'flex-start', // Ensures alignment with comments card
+  },
+  investmentInput: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderColor: '#4CAF50', // Green border to match the theme
+    borderWidth: 1.5,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   
 });
