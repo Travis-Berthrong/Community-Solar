@@ -1,13 +1,14 @@
 // app/addproject.tsx
-import React, { useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity, View, Dimensions, StyleSheet } from 'react-native';
 import CreateProjectForm from '@/components/CreateProjectForm';
 import ProjectForecast from '@/components/ProjectForecast';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect } from 'react';
-import { ScreenStackHeaderLeftView } from 'react-native-screens';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { HeaderTitle } from '@/components/HeaderTitle';
+
+const { width } = Dimensions.get('window');
+
 
 interface ProjectInfo {
   title: string;
@@ -26,12 +27,14 @@ export default function AddProjectPage() {
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => <HeaderTitle headerText="Propose Your Project !" />,
+      headerTitleAlign: 'center', // Ensures title is centered
+      headerStyle: styles.header,
       headerLeft: () => (
-        <ScreenStackHeaderLeftView>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 40 }}>
+        <View style={styles.headerLeftContainer}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="chevron-back" size={24} color="#ffffff" />
           </TouchableOpacity>
-        </ScreenStackHeaderLeftView>
+        </View>
       ),
     });
   }, [navigation]);
@@ -61,3 +64,19 @@ export default function AddProjectPage() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: '#2E7D32',
+  },
+  headerLeftContainer: {
+    position: 'absolute',
+    left: width * 0.15, // Position the back button halfway between the left edge and the title
+    zIndex: 1, // Ensure it's above other elements
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+});

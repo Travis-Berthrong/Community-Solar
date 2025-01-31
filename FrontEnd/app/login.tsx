@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, Alert, KeyboardAvoidingView, Platform, Text, TouchableOpacity } from 'react-native';
 import { Button } from '@rneui/themed';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { login } from '../services/auth';
 import { loginStyles } from '../styles/loginStyles';
 
@@ -28,10 +28,16 @@ export default function Login() {
   };
 
   return (
+    
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={loginStyles.container}
     >
+      <Stack.Screen
+        options={{
+          headerLeft: () => (null),
+        }}
+      />
       <View style={loginStyles.card}>
         <Text style={loginStyles.title}>Let's Save the Planet!</Text>
         <Text style={loginStyles.subtitle}>

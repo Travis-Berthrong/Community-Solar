@@ -1,22 +1,48 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColorScheme } from '@/lib/useColorScheme';
 import { getToken } from '../services/auth';
 import { Text, View, StyleSheet, Platform } from 'react-native';
+import "../global.css";
+import { Theme, ThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { NAV_THEME } from '~/lib/constants';
 
 SplashScreen.preventAutoHideAsync();
 
+const LIGHT_THEME: Theme = {
+  ...DefaultTheme,
+  colors: NAV_THEME.light,
+};
+const DARK_THEME: Theme = {
+  ...DarkTheme,
+  colors: NAV_THEME.dark,
+};
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const hasMounted = React.useRef(false);
+  const { colorScheme, isDarkColorScheme } = useColorScheme();
+  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+
+  useIsomorphicLayoutEffect(() => {
+    if (hasMounted.current) {
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      // Adds the background color to the html element to prevent white background on overscroll.
+      document.documentElement.classList.add('bg-background');
+    }
+    setIsColorSchemeLoaded(true);
+    hasMounted.current = true;
+  }, []);
 
   useEffect(() => {
     checkLoginStatus();
@@ -34,7 +60,7 @@ export default function RootLayout() {
     setIsLoggedIn(!!token);
   }
 
-  if (!loaded || isLoggedIn === null) {
+  if (!isColorSchemeLoaded || !loaded || isLoggedIn === null) {
     return null;
   }
 
@@ -43,7 +69,7 @@ export default function RootLayout() {
       <>
         <Stack
           screenOptions={({ route }) => ({
-            headerShown: route.name === 'login' || route.name === 'signup' || route.name === 'addproject',
+            headerShown: route.name === 'login' || route.name === 'signup' || route.name === 'addproject' || route.name === 'projects/[id]',
             headerTitle: () => <HeaderTitle headerText={(route.name === 'login' || route.name === 'signup') && Platform.OS === 'web' ? 'WELCOME TO COMMUNITY SOLAR !': 'COMMUNITY SOLAR'}/>,
             headerStyle: styles.header,
             headerTitleAlign: 'center',
@@ -84,6 +110,18 @@ export default function RootLayout() {
                 headerTitleAlign: 'center',
                 headerTintColor: '#fff',
               }} />
+              <Stack.Screen
+                name="project/[id]"
+                getId={({ params }) => params?.id}
+                options={{ 
+                  headerShown: true,
+                  headerTitle: () => <HeaderTitle />,
+                  headerStyle: styles.header,
+                  headerTitleAlign: 'center',
+                  headerTintColor: '#fff',
+                  headerLeft: () => null,
+                }}
+              />
             </>
           ) : (
             <>
@@ -101,7 +139,7 @@ export default function RootLayout() {
             </>
           )}
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
       </>
     </ThemeProvider>
   );
@@ -119,6 +157,9 @@ function HeaderTitle({ headerText }: { readonly headerText?: string }) {
     </View>
   );
 }
+
+const useIsomorphicLayoutEffect =
+Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
 
 const styles = StyleSheet.create({
   header: {
